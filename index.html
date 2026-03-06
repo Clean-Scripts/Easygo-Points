@@ -161,107 +161,183 @@ h1,h2,h3{
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycbz6pHOQ6sqxRYfQPW8lL2SbfDQX6ok4xFEQZJmntoUyiNPSCKBu6M5F4oEJpVTsy1D3/exec"; 
-let mobile=null, generatedOTP=null;
+/* Naya API URL jo aapne upar diya hai */
+const API = "https://script.google.com/macros/s/AKfycbwDSTqsi34lBvKgyymBjF2eKiptyfshDsKPelDQzArbdoShqTEffk2zBcf9zchQ-Uc/exec"; 
+let mobile = null, generatedOTP = null;
 
-function popup(msg){ const p=document.getElementById("popup"); p.innerText=msg; p.classList.add("show"); setTimeout(()=>p.classList.remove("show"),3000); }
-
-function sendOTP(){ mobile=document.getElementById("mobile").value; if(mobile.length!=10){popup("Enter valid mobile");return;} generatedOTP=Math.floor(1000+Math.random()*9000); popup("OTP Sent: "+generatedOTP); document.getElementById("login").classList.add("hidden"); document.getElementById("otpBox").classList.remove("hidden"); }
-
-async function verifyOTP(){
-  if(document.getElementById("otp").value==generatedOTP){
-    let res=await api({action:"login", mobile})
-    if(res.success){ localStorage.setItem("easygo_user", mobile); startApp(); } else popup("Login failed")
-  } else popup("Invalid OTP")
+function popup(msg) { 
+    const p = document.getElementById("popup"); 
+    p.innerText = msg; 
+    p.classList.add("show"); 
+    setTimeout(() => p.classList.remove("show"), 3000); 
 }
 
-window.onload=()=>{ let saved=localStorage.getItem("easygo_user"); if(saved){ mobile=saved; startApp() } }
-
-function startApp(){ document.getElementById("login").style.display="none"; document.getElementById("otpBox").style.display="none"; document.getElementById("app").classList.remove("hidden"); loadWallet(); loadLeaderboard(); }
-
-function showTab(id){ ["claim","wallet","leaderboard"].forEach(t=>document.getElementById(t).classList.add("hidden")); document.getElementById(id).classList.remove("hidden"); }
-
-async function api(data){ let res=await fetch(API,{method:"POST",body:JSON.stringify(data)}); return await res.json(); }
-
-const milestonesArr=[ {coins:100,text:"Free Cheese Ball"}, {coins:200,text:"Cheese Corn Nuggets"}, {coins:400,text:"2 Spring Rolls"}, {coins:700,text:"Free Fries"}, {coins:1000,text:"Veg Steam Momos"} ];
-
-async function loadWallet(){
-  let res=await api({action:"wallet",mobile});
-  animateCoins(res.coins);
-  if(res.expired>0) popup(res.expired+" coins expired");
-  if(res.expiringSoon>0) popup(res.expiringSoon+" coins expiring soon!");
-  updateMilestones(res.coins);
+/* --- LOGIN LOGIC --- */
+function sendOTP() { 
+    mobile = document.getElementById("mobile").value; 
+    if (mobile.length != 10) { popup("Enter valid 10-digit mobile"); return; } 
+    generatedOTP = Math.floor(1000 + Math.random() * 9000); 
+    popup("OTP Sent: " + generatedOTP); 
+    document.getElementById("login").classList.add("hidden"); 
+    document.getElementById("otpBox").classList.remove("hidden"); 
 }
 
-function animateCoins(target){
-  let el=document.getElementById("coins"), c=0;
-  let i=setInterval(()=>{
-    c+=5; if(c>=target){ c=target; clearInterval(i) }
-    el.innerText=c
-  },10)
+async function verifyOTP() {
+    if (document.getElementById("otp").value == generatedOTP) {
+        let res = await api({ action: "login", mobile });
+        if (res.success) { 
+            localStorage.setItem("easygo_user", mobile); 
+            startApp(); 
+        } else popup("Login failed");
+    } else popup("Invalid OTP");
 }
 
-function updateMilestones(coins){
-  const bar=document.getElementById("milestoneProgress");
-  let nextMilestone = milestonesArr.find(m=>m.coins>coins)?.coins || milestonesArr[milestonesArr.length-1].coins;
-  let prevMilestone = milestonesArr.filter(m=>m.coins<=coins).pop()?.coins || 0;
-  bar.style.width=Math.min(100,((coins-prevMilestone)/(nextMilestone-prevMilestone)*100))+"%";
+window.onload = () => { 
+    let saved = localStorage.getItem("easygo_user"); 
+    if (saved) { mobile = saved; startApp(); } 
+};
 
-  const mDiv=document.getElementById("milestones"); mDiv.innerHTML="";
-  milestonesArr.forEach(m=>{
-    mDiv.innerHTML+=`<div class="milestone-badge ${coins>=m.coins?'reached':''}">${m.coins} → ${m.text}</div>`;
-  })
+function startApp() { 
+    document.getElementById("login").style.display = "none"; 
+    document.getElementById("otpBox").style.display = "none"; 
+    document.getElementById("app").classList.remove("hidden"); 
+    loadWallet(); 
+    loadLeaderboard(); 
 }
 
-/* CLAIM CODE */
-async function claimCode(){
-  let code=document.getElementById("code").value;
-  let res=await api({action:"claim",mobile,code});
-  if(res.error){popup(res.error); return}
-  // coin fly animation
-  const start=document.getElementById("claim").getBoundingClientRect();
-  const end=document.getElementById("coins").getBoundingClientRect();
-  for(let i=0;i<res.coins;i+=5){
-    let c=document.createElement("div"); c.className="coin-fly"; document.body.appendChild(c);
-    c.style.left=start.left+start.width/2+"px"; c.style.top=start.top+"px";
-    let dx=end.left-start.left; let dy=end.top-start.top;
-    c.animate([{transform:`translate(0px,0px)`},{transform:`translate(${dx}px,${dy}px)`}],{duration:600,fill:"forwards"});
-    setTimeout(()=>c.remove(),700);
-  }
-  confetti({particleCount:100,spread:70,origin:{y:0.6}});
-  popup("Reward Claimed: "+res.coins+" coins"); loadWallet(); loadLeaderboard();
+function showTab(id) { 
+    ["claim", "wallet", "leaderboard"].forEach(t => document.getElementById(t).classList.add("hidden")); 
+    document.getElementById(id).classList.remove("hidden"); 
 }
 
-/* REFERRAL */
-async function referFriend(){
-  let friend=document.getElementById("refMobile").value;
-  if(friend.length!=10){popup("Enter valid mobile");return;}
-  
-  let res=await api({action:"refer", mobile, friend});
-  
-  if(res.success){
-    popup(res.message);
-
-    // Generate heartwarming WhatsApp message
-    let msg=`Hey! 🌟 I've just invited you to join EasyGo VIP Rewards! 🍔🎉
-You get Coins, Goodies and Milestones when you Claim your *First Code.*
-*Sign in now:* https://clean-scripts.github.io/Easygo-Points/
-_Let's enjoy Rewards Together!_ 🚀`;
-
-    let url=`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
-    window.open(url,'_blank');
-  } else popup(res.error);
+/* --- API CALL --- */
+async function api(data) { 
+    try {
+        let res = await fetch(API, { method: "POST", body: JSON.stringify(data) }); 
+        return await res.json(); 
+    } catch (e) {
+        console.error("API Error:", e);
+        return { error: "Network Error" };
+    }
 }
 
-/* LEADERBOARD */
-async function loadLeaderboard(){
-  let res=await api({action:"leaderboard"});
-  let board=document.getElementById("board"); board.innerHTML="";
-  res.forEach((u,i)=>{
-    let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1);
-    let number="XX"+String(u.mobile).slice(-4); // privacy
-    board.innerHTML+=`<div class="flex justify-between border-b py-2"><span class="medal ${i<3?'animated':''}">${medal}</span><span>${number}</span><span>${u.coins} coins</span></div>`;
-  })
+const milestonesArr = [ 
+    { coins: 100, text: "2 Cheese Ball" }, 
+    { coins: 200, text: "2 Cheese Corn Nuggets" }, 
+    { coins: 400, text: "4 Spring Rolls" }, 
+    { coins: 700, text: "90g French Fries" }, 
+    { coins: 900, text: "Veg Steam Momos [7 Pcs]" } 
+];
+
+/* --- WALLET --- */
+async function loadWallet() {
+    let res = await api({ action: "wallet", mobile });
+    if(res.coins !== undefined) {
+        animateCoins(res.coins);
+        updateMilestones(res.coins);
+    }
+    if (res.expired > 0) popup(res.expired + " coins expired");
+    if (res.expiringSoon > 0) popup(res.expiringSoon + " coins expiring soon!");
+}
+
+function animateCoins(target) {
+    let el = document.getElementById("coins"), c = 0;
+    let current = parseInt(el.innerText) || 0;
+    if(current === target) return;
+    
+    let step = target > current ? 5 : -5;
+    let i = setInterval(() => {
+        current += step;
+        if ((step > 0 && current >= target) || (step < 0 && current <= target)) {
+            current = target;
+            clearInterval(i);
+        }
+        el.innerText = current;
+    }, 10);
+}
+
+function updateMilestones(coins) {
+    const bar = document.getElementById("milestoneProgress");
+    let nextM = milestonesArr.find(m => m.coins > coins) || milestonesArr[milestonesArr.length - 1];
+    let prevM = [...milestonesArr].reverse().find(m => m.coins <= coins) || { coins: 0 };
+    
+    let percent = ((coins - prevM.coins) / (nextM.coins - prevM.coins)) * 100;
+    bar.style.width = Math.min(100, Math.max(0, percent)) + "%";
+
+    const mDiv = document.getElementById("milestones"); 
+    mDiv.innerHTML = "";
+    milestonesArr.forEach(m => {
+        mDiv.innerHTML += `<div class="milestone-badge ${coins >= m.coins ? 'reached' : ''}">${m.coins} → ${m.text}</div>`;
+    });
+}
+
+/* --- CLAIM CODE --- */
+async function claimCode() {
+    let codeInput = document.getElementById("code");
+    let code = codeInput.value.trim();
+    if(!code) { popup("Please enter a code"); return; }
+
+    let res = await api({ action: "claim", mobile, code });
+    if (res.error) { popup(res.error); return; }
+
+    // Coin animation
+    const start = document.getElementById("claim").getBoundingClientRect();
+    const end = document.getElementById("coins").getBoundingClientRect();
+    for (let i = 0; i < 10; i++) { // fixed 10 coins visual
+        let c = document.createElement("div"); 
+        c.className = "coin-fly"; 
+        document.body.appendChild(c);
+        c.style.left = (start.left + start.width / 2) + "px"; 
+        c.style.top = start.top + "px";
+        let dx = end.left - start.left; 
+        let dy = end.top - start.top;
+        c.animate([{ transform: `translate(0px,0px)` }, { transform: `translate(${dx}px,${dy}px)` }], { duration: 600, fill: "forwards" });
+        setTimeout(() => c.remove(), 700);
+    }
+    
+    confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
+    popup("Success! Reward Claimed.");
+    codeInput.value = "";
+    loadWallet(); 
+    loadLeaderboard();
+}
+
+/* --- REFERRAL FIXES --- */
+function toggleReferral() {
+    const refBox = document.getElementById("refBox");
+    refBox.classList.toggle("hidden");
+}
+
+async function referFriend() {
+    let friend = document.getElementById("refMobile").value;
+    if (friend.length != 10) { popup("Enter valid 10-digit mobile"); return; }
+    if (friend == mobile) { popup("You cannot refer yourself"); return; }
+
+    popup("Checking referral...");
+    let res = await api({ action: "refer", mobile, friend });
+
+    if (res.success) {
+        popup("Opening WhatsApp...");
+        let msg = `Hey! 🌟 I've just invited you to join EasyGo VIP Rewards! 🍔🎉\nGet Coins and Free Goodies on your first visit!\n*Sign in now:* https://clean-scripts.github.io/Easygo-Points/\n_Let's enjoy Rewards Together!_ 🚀`;
+        
+        // window.open popups block hote hain, location.href is better
+        window.location.href = `https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
+    } else {
+        popup(res.error || "Referral failed");
+    }
+}
+
+/* --- LEADERBOARD --- */
+async function loadLeaderboard() {
+    let res = await api({ action: "leaderboard" });
+    if(!Array.isArray(res)) return;
+    let board = document.getElementById("board"); 
+    board.innerHTML = "";
+    res.forEach((u, i) => {
+        let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
+        let number = "XX" + String(u.mobile).slice(-4);
+        board.innerHTML += `<div class="flex justify-between border-b py-2"><span class="medal ${i < 3 ? 'animated' : ''}">${medal}</span><span>${number}</span><span>${u.coins} coins</span></div>`;
+    });
 }
 </script>
 

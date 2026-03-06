@@ -12,17 +12,20 @@ body{margin:0;font-family:system-ui;color:white;height:100vh;background:url('bac
 .app{max-width:420px;margin:auto;padding:20px;}
 .card{background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);padding:20px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.5);animation:fadeUp .5s;}
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-.popup{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#111;padding:14px 20px;border-radius:8px;display:none;z-index:9999;}
+.popup{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#111;padding:14px 20px;border-radius:8px;display:none;z-index:9999;font-weight:bold;}
 .show{display:block;}
 .medal{font-size:20px;}
 .progress-bar{height:20px;background:#444;border-radius:10px;overflow:hidden;}
 .progress{height:100%;background:linear-gradient(90deg,#facc15,#f97316);width:0;}
+.milestone-badge{display:inline-block;margin:2px;padding:4px 8px;border-radius:8px;background:#222;color:#fff;transition:0.3s;}
+.milestone-badge.reached{background:yellow;color:black;font-weight:bold;transform:scale(1.2);animation:badgeGlow 1s;}
+@keyframes badgeGlow{0%,100%{box-shadow:0 0 5px yellow;}50%{box-shadow:0 0 20px gold;}}
+.coin-fly{position:absolute;width:24px;height:24px;background:url('coin.png') no-repeat center/cover;pointer-events:none;z-index:9999;}
 </style>
 </head>
 <body>
 
 <div id="popup" class="popup"></div>
-
 <div class="app">
 
 <!-- LOGO -->
@@ -67,9 +70,9 @@ body{margin:0;font-family:system-ui;color:white;height:100vh;background:url('bac
 <h2 class="text-lg mb-3">Your Coins</h2>
 <div class="text-4xl text-yellow-400 font-bold mb-2" id="coins">0</div>
 <div class="progress-bar mb-2"><div class="progress" id="milestoneProgress"></div></div>
-<div id="milestones" class="text-sm space-y-1"></div>
+<div id="milestones" class="text-sm space-y-1 mb-4"></div>
 
-<button onclick="toggleReferral()" class="bg-blue-500 px-4 py-2 rounded mt-4">Refer a Friend</button>
+<button onclick="toggleReferral()" class="bg-blue-500 px-4 py-2 rounded mt-2">Refer a Friend</button>
 <div id="refBox" class="hidden mt-3">
 <input id="refMobile" placeholder="Friend Mobile" class="w-full p-3 text-black rounded mb-2">
 <button onclick="referFriend()" class="bg-green-500 w-full p-2 rounded">Send Referral</button>
@@ -83,83 +86,76 @@ body{margin:0;font-family:system-ui;color:white;height:100vh;background:url('bac
 </div>
 
 </div>
-</div>
-
 <script>
 const API="https://script.google.com/macros/s/AKfycbz-k4gfyH632VSHOMbBfO04mxRTXBFk44ad29bToIBkHclfrKAr023pInu30HgGRUXvag/exec";
 let mobile=null, generatedOTP=null;
 
-function popup(msg){ const p=document.getElementById("popup"); p.innerText=msg; p.classList.add("show"); setTimeout(()=>p.classList.remove("show"),2500); }
+function popup(msg){ const p=document.getElementById("popup"); p.innerText=msg; p.classList.add("show"); setTimeout(()=>p.classList.remove("show"),3000); }
 
-function sendOTP(){
-  mobile=document.getElementById("mobile").value
-  if(mobile.length!=10){popup("Enter valid mobile");return;}
-  generatedOTP=Math.floor(1000+Math.random()*9000)
-  popup("OTP Sent: "+generatedOTP)
-  document.getElementById("login").classList.add("hidden")
-  document.getElementById("otpBox").classList.remove("hidden")
-}
+function sendOTP(){ mobile=document.getElementById("mobile").value; if(mobile.length!=10){popup("Enter valid mobile");return;} generatedOTP=Math.floor(1000+Math.random()*9000); popup("OTP Sent: "+generatedOTP); document.getElementById("login").classList.add("hidden"); document.getElementById("otpBox").classList.remove("hidden"); }
+function verifyOTP(){ if(document.getElementById("otp").value==generatedOTP){ localStorage.setItem("easygo_user",mobile); startApp() } else popup("Invalid OTP") }
+window.onload=()=>{ let saved=localStorage.getItem("easygo_user"); if(saved){mobile=saved; startApp()} }
 
-function verifyOTP(){
-  if(document.getElementById("otp").value==generatedOTP){
-    localStorage.setItem("easygo_user",mobile)
-    startApp()
-  }else popup("Invalid OTP")
-}
+function startApp(){ document.getElementById("login").style.display="none"; document.getElementById("otpBox").style.display="none"; document.getElementById("app").classList.remove("hidden"); loadWallet(); loadLeaderboard(); }
 
-window.onload=()=>{
-  let saved=localStorage.getItem("easygo_user")
-  if(saved){ mobile=saved; startApp() }
-}
+function showTab(id){ ["claim","wallet","leaderboard"].forEach(t=>document.getElementById(t).classList.add("hidden")); document.getElementById(id).classList.remove("hidden"); }
 
-function startApp(){
-  document.getElementById("login").style.display="none"
-  document.getElementById("otpBox").style.display="none"
-  document.getElementById("app").classList.remove("hidden")
-  loadWallet()
-  loadLeaderboard()
-}
+async function api(data){ let res=await fetch(API,{method:"POST",body:JSON.stringify(data)}); return await res.json(); }
 
-function showTab(id){
-  ["claim","wallet","leaderboard"].forEach(t=>document.getElementById(t).classList.add("hidden"))
-  document.getElementById(id).classList.remove("hidden")
-}
+const milestonesArr=[
+  {coins:100,text:"Free Cheese Ball"},
+  {coins:200,text:"Cheese Corn Nuggets"},
+  {coins:400,text:"2 Spring Rolls"},
+  {coins:700,text:"Free Fries"},
+  {coins:1000,text:"Veg Steam Momos"}
+]
 
-async function api(data){
-  let res=await fetch(API,{method:"POST",body:JSON.stringify(data)})
-  return await res.json()
-}
-
-/* WALLET */
-const milestonesArr=[100,200,400,700,1000]
 async function loadWallet(){
   let res=await api({action:"wallet",mobile})
   animateCoins(res.coins)
+  
+  // Coin expiry alert
+  if(res.expired>0) popup(res.expired+" coins expired")
+  if(res.expiringSoon>0) popup(res.expiringSoon+" coins expiring in few days!")
+
   updateMilestones(res.coins)
 }
+
 function animateCoins(target){
   let el=document.getElementById("coins"); let c=0
   let i=setInterval(()=>{ c+=5; if(c>=target){ c=target; clearInterval(i) }; el.innerText=c },15)
 }
+
 function updateMilestones(coins){
   const bar=document.getElementById("milestoneProgress")
-  let next=milestonesArr.find(m=>m>coins)||milestonesArr[milestonesArr.length-1]
-  let prev=milestonesArr.filter(m=>m<=coins).pop()||0
-  bar.style.width=Math.min(100, ((coins-prev)/(next-prev)*100))+"%"
+  let nextMilestone = milestonesArr.find(m=>m.coins>coins)?.coins || milestonesArr[milestonesArr.length-1].coins
+  let prevMilestone = milestonesArr.filter(m=>m.coins<=coins).pop()?.coins || 0
+  bar.style.width=Math.min(100,((coins-prevMilestone)/(nextMilestone-prevMilestone)*100))+"%"
+
   const mDiv=document.getElementById("milestones")
   mDiv.innerHTML=""
-  milestonesArr.forEach(m=>{ 
-    mDiv.innerHTML+=`<div class="${coins>=m?'text-green-400 font-bold':'text-gray-400'}">${m} coins reward</div>`
+  milestonesArr.forEach(m=>{
+    mDiv.innerHTML+=`<div class="milestone-badge ${coins>=m.coins?'reached':''}">${m.coins} → ${m.text}</div>`
   })
-  if(res.expired>0) popup(res.expired+" coins expired")
-  if(res.expiringSoon>0) popup(res.expiringSoon+" coins expiring soon")
 }
 
-/* CLAIM CODE */
+/* CLAIM CODE WITH COIN FLY ANIMATION */
 async function claimCode(){
   let code=document.getElementById("code").value
   let res=await api({action:"claim",mobile,code})
-  if(res.error){popup(res.error);return}
+  if(res.error){popup(res.error); return}
+  
+  // Coin flying animation
+  const start=document.getElementById("claim").getBoundingClientRect()
+  const end=document.getElementById("coins").getBoundingClientRect()
+  for(let i=0;i<res.coins;i+=10){
+    let c=document.createElement("div"); c.className="coin-fly"; document.body.appendChild(c)
+    c.style.left=start.left+start.width/2+"px"; c.style.top=start.top+"px"
+    let dx=end.left-start.left; let dy=end.top-start.top
+    c.animate([{transform:`translate(0px,0px)`},{transform:`translate(${dx}px,${dy}px)`}],{duration:600,fill:"forwards"})
+    setTimeout(()=>c.remove(),700)
+  }
+
   confetti({particleCount:100,spread:70,origin:{y:0.6}})
   popup("Reward Claimed: "+res.coins+" coins")
   loadWallet(); loadLeaderboard()
@@ -171,7 +167,17 @@ async function referFriend(){
   let friend=document.getElementById("refMobile").value
   if(friend.length!=10){popup("Enter valid mobile");return}
   let res=await api({action:"refer",mobile,friend})
-  if(res.success){popup(res.message);loadWallet()}else popup(res.error)
+  if(res.success){
+    popup(res.message); loadWallet()
+    // Referral reward animation
+    const walletRect=document.getElementById("coins").getBoundingClientRect()
+    for(let i=0;i<30;i++){
+      let c=document.createElement("div"); c.className="coin-fly"; document.body.appendChild(c)
+      c.style.left=walletRect.left+walletRect.width/2+"px"; c.style.top=walletRect.top+"px"
+      c.animate([{transform:"translate(0px,0px)"},{transform:`translate(${Math.random()*20-10}px, -50px)`}],{duration:800,fill:"forwards"})
+      setTimeout(()=>c.remove(),900)
+    }
+  } else popup(res.error)
 }
 
 /* LEADERBOARD */
@@ -184,6 +190,5 @@ async function loadLeaderboard(){
   })
 }
 </script>
-
 </body>
 </html>

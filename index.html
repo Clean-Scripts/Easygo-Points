@@ -1,454 +1,104 @@
 <!DOCTYPE html>
 <html>
 <head>
-
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1">
-
 <title>EasyGo VIP</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-
 <style>
-
-body{
-margin:0;
-height:100vh;
-background:url("background.png") no-repeat center center fixed;
-background-size:cover;
-font-family:system-ui;
-color:white;
-}
-
-.app{
-max-width:420px;
-margin:auto;
-padding:20px;
-}
-
-.card{
-background:rgba(0,0,0,0.6);
-backdrop-filter:blur(10px);
-padding:20px;
-border-radius:16px;
-box-shadow:0 10px 30px rgba(0,0,0,0.5);
-animation:fadeUp .5s;
-}
-
-nav button{
-flex:1;
-padding:10px;
-border-radius:10px;
-border:none;
-font-weight:bold;
-cursor:pointer;
-transition:.3s;
-}
-
-nav button:hover{
-transform:scale(1.05);
-}
-
-@keyframes fadeUp{
-from{opacity:0;transform:translateY(20px)}
-to{opacity:1;transform:translateY(0)}
-}
-
-.popup{
-position:fixed;
-top:20px;
-left:50%;
-transform:translateX(-50%);
-background:#111;
-padding:14px 20px;
-border-radius:8px;
-display:none;
-}
-
+body{margin:0;height:100vh;background:url('background.png') no-repeat center center fixed;background-size:cover;font-family:system-ui;color:white}
+.app{max-width:420px;margin:auto;padding:20px}
+.card{background:rgba(0,0,0,0.6);backdrop-filter:blur(10px);padding:20px;border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,0.5);animation:fadeUp .5s}
+@keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
+.popup{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#111;padding:14px 20px;border-radius:8px;display:none}
 .show{display:block}
-
-.medal{
-font-size:20px;
-}
-
+.medal{font-size:20px}
 </style>
-
 </head>
-
 <body>
-
 <div id="popup" class="popup"></div>
-
 <div class="app">
-
-<!-- LOGO -->
-
-<div class="text-center mb-6">
-
-<img src="EasyGo-Logo.png" class="h-16 mx-auto">
-
-</div>
-
-
-<!-- LOGIN -->
+<div class="text-center mb-6"><img src="EasyGo-Logo.png" class="h-16 mx-auto"></div>
 
 <div id="login" class="card">
-
 <h2 class="text-xl mb-4">Login</h2>
-
-<input id="mobile"
-placeholder="Enter Mobile Number"
-class="w-full p-3 text-black rounded mb-3">
-
-<button onclick="sendOTP()"
-class="w-full bg-orange-500 p-3 rounded font-bold">
-Send OTP
-</button>
-
+<input id="mobile" placeholder="Enter Mobile Number" class="w-full p-3 text-black rounded mb-3">
+<button onclick="sendOTP()" class="w-full bg-orange-500 p-3 rounded font-bold">Send OTP</button>
 </div>
-
-
-<!-- OTP BOX -->
 
 <div id="otpBox" class="card hidden">
-
-<input id="otp"
-placeholder="Enter OTP"
-class="w-full p-3 text-black rounded mb-3">
-
-<button onclick="verifyOTP()"
-class="w-full bg-green-500 p-3 rounded font-bold">
-Verify OTP
-</button>
-
+<input id="otp" placeholder="Enter OTP" class="w-full p-3 text-black rounded mb-3">
+<button onclick="verifyOTP()" class="w-full bg-green-500 p-3 rounded font-bold">Verify OTP</button>
 </div>
 
-
-<!-- APP -->
-
-<div id="app" class="hidden">
-
-<!-- NAV -->
-
+<div id="appUI" class="hidden">
 <nav class="flex gap-2 mb-4">
-
-<button class="bg-orange-500" onclick="showTab('claim')">
-Claim Code
-</button>
-
-<button class="bg-blue-500" onclick="showTab('wallet')">
-Wallet
-</button>
-
-<button class="bg-purple-600" onclick="showTab('leaderboard')">
-Leaderboard
-</button>
-
+<button class="bg-orange-500 flex-1" onclick="showTab('claim')">Claim</button>
+<button class="bg-blue-500 flex-1" onclick="showTab('wallet')">Wallet</button>
+<button class="bg-purple-600 flex-1" onclick="showTab('leaderboard')">Leaderboard</button>
 </nav>
 
-
-<!-- CLAIM -->
-
 <div id="claim" class="card">
-
 <h2 class="text-lg mb-3">Enter Secret Code</h2>
-
-<input id="code"
-class="w-full p-3 text-black rounded mb-3">
-
-<button onclick="claimCode()"
-class="w-full bg-orange-500 p-3 rounded font-bold">
-Claim Reward
-</button>
-
+<input id="code" class="w-full p-3 text-black rounded mb-3">
+<button onclick="claimCode()" class="w-full bg-orange-500 p-3 rounded font-bold">Claim Reward</button>
 </div>
-
-
-<!-- WALLET -->
 
 <div id="wallet" class="card hidden">
-
 <h2 class="text-lg mb-3">Your Coins</h2>
-
-<div id="coins"
-class="text-4xl text-yellow-400 font-bold mb-4">
-0
-</div>
-
-<button onclick="showReferral()"
-class="bg-blue-500 px-4 py-2 rounded">
-Refer Friend
-</button>
-
+<div id="coins" class="text-4xl text-yellow-400 font-bold mb-4">0</div>
+<button onclick="showReferral()" class="bg-blue-500 px-4 py-2 rounded">Refer Friend</button>
 <div id="refBox" class="hidden mt-4">
-
-<input id="refMobile"
-placeholder="Friend Mobile"
-class="w-full p-3 text-black rounded mb-2">
-
-<button onclick="referFriend()"
-class="bg-green-500 w-full p-2 rounded">
-Send Referral
-</button>
-
+<input id="refMobile" placeholder="Friend Mobile" class="w-full p-3 text-black rounded mb-2">
+<button onclick="referFriend()" class="bg-green-500 w-full p-2 rounded">Send Referral</button>
 </div>
-
 <h3 class="mt-6 mb-2">Milestone Rewards</h3>
-
 <div class="space-y-2 text-sm">
-
 <div>100 Coins → Free Cheese Ball</div>
 <div>200 Coins → Cheese Corn Nuggets</div>
 <div>400 Coins → 2 Spring Rolls</div>
 <div>700 Coins → Free Fries</div>
 <div>1000 Coins → Veg Steam Momos</div>
-
 </div>
-
 </div>
-
-
-<!-- LEADERBOARD -->
 
 <div id="leaderboard" class="card hidden">
-
 <h2 class="mb-3">Top Foodies</h2>
-
 <div id="board"></div>
-
 </div>
-
 </div>
-
 </div>
-
 
 <script>
-
 const API="https://script.google.com/macros/s/AKfycbz-k4gfyH632VSHOMbBfO04mxRTXBFk44ad29bToIBkHclfrKAr023pInu30HgGRUXvag/exec"
+let mobile=null, generatedOTP=null
 
-let mobile=null
-let generatedOTP=null
+function popup(msg){const p=document.getElementById("popup");p.innerText=msg;p.classList.add("show");setTimeout(()=>p.classList.remove("show"),2500)}
 
-function popup(msg){
+function sendOTP(){mobile=document.getElementById("mobile").value;if(mobile.length!=10){popup("Enter valid mobile");return}generatedOTP=Math.floor(1000+Math.random()*9000);popup("OTP Sent: "+generatedOTP);document.getElementById("login").classList.add("hidden");document.getElementById("otpBox").classList.remove("hidden")}
 
-const p=document.getElementById("popup")
+function verifyOTP(){let otp=document.getElementById("otp").value;if(otp==generatedOTP){localStorage.setItem("easygo_user",mobile);startApp()}else{popup("Invalid OTP")}}
 
-p.innerText=msg
+window.onload=()=>{let saved=localStorage.getItem("easygo_user");if(saved){mobile=saved;startApp()}}
 
-p.classList.add("show")
+function startApp(){document.getElementById("login").style.display="none";document.getElementById("otpBox").style.display="none";document.getElementById("appUI").classList.remove("hidden");loadWallet();loadLeaderboard()}
 
-setTimeout(()=>p.classList.remove("show"),2500)
+function showTab(id){["claim","wallet","leaderboard"].forEach(t=>document.getElementById(t).classList.add("hidden"));document.getElementById(id).classList.remove("hidden")}
 
-}
+async function api(data){let res=await fetch(API,{method:"POST",body:JSON.stringify(data)});return await res.json()}
 
-function sendOTP(){
+async function loadWallet(){let res=await api({action:"wallet",mobile});animateCoins(res.coins)}
 
-mobile=document.getElementById("mobile").value
+function animateCoins(target){let el=document.getElementById("coins"),c=0,i=setInterval(()=>{c+=5;if(c>=target){c=target;clearInterval(i)}el.innerText=c},20)}
 
-if(mobile.length!=10){
-popup("Enter valid mobile")
-return
-}
+async function claimCode(){let code=document.getElementById("code").value,res=await api({action:"claim",mobile,code});if(res.error){popup(res.error);return}confetti();popup("Reward Claimed!");loadWallet()}
 
-generatedOTP=Math.floor(1000+Math.random()*9000)
+function showReferral(){document.getElementById("refBox").classList.toggle("hidden")}
 
-popup("OTP Sent: "+generatedOTP)
+async function referFriend(){let friend=document.getElementById("refMobile").value,res=await api({action:"refer",mobile,friend});if(res.success){popup("Referral Sent")}else{popup(res.error)}}
 
-document.getElementById("login").classList.add("hidden")
-
-document.getElementById("otpBox").classList.remove("hidden")
-
-}
-
-function verifyOTP(){
-
-let otp=document.getElementById("otp").value
-
-if(otp==generatedOTP){
-
-localStorage.setItem("easygo_user",mobile)
-
-startApp()
-
-}
-else{
-
-popup("Invalid OTP")
-
-}
-
-}
-
-window.onload=()=>{
-
-let saved=localStorage.getItem("easygo_user")
-
-if(saved){
-
-mobile=saved
-startApp()
-
-}
-
-}
-
-function startApp(){
-
-document.getElementById("login").style.display="none"
-
-document.getElementById("otpBox").style.display="none"
-
-document.getElementById("app").classList.remove("hidden")
-
-loadWallet()
-loadLeaderboard()
-
-}
-
-function showTab(id){
-
-["claim","wallet","leaderboard"].forEach(t=>{
-
-document.getElementById(t).classList.add("hidden")
-
-})
-
-document.getElementById(id).classList.remove("hidden")
-
-}
-
-async function api(data){
-
-let res=await fetch(API,{
-method:"POST",
-body:JSON.stringify(data)
-})
-
-return await res.json()
-
-}
-
-async function loadWallet(){
-
-let res=await api({
-action:"wallet",
-mobile:mobile
-})
-
-animateCoins(res.coins)
-
-}
-
-function animateCoins(target){
-
-let el=document.getElementById("coins")
-
-let c=0
-
-let i=setInterval(()=>{
-
-c+=5
-
-if(c>=target){
-
-c=target
-clearInterval(i)
-
-}
-
-el.innerText=c
-
-},20)
-
-}
-
-async function claimCode(){
-
-let code=document.getElementById("code").value
-
-let res=await api({
-action:"claim",
-mobile:mobile,
-code:code
-})
-
-if(res.error){
-popup(res.error)
-return
-}
-
-confetti()
-
-popup("Reward Claimed!")
-
-loadWallet()
-
-}
-
-function showReferral(){
-
-document.getElementById("refBox").classList.toggle("hidden")
-
-}
-
-async function referFriend(){
-
-let friend=document.getElementById("refMobile").value
-
-let res=await api({
-action:"refer",
-mobile:mobile,
-friend:friend
-})
-
-if(res.success){
-popup("Referral Sent")
-}else{
-popup(res.error)
-}
-
-}
-
-async function loadLeaderboard(){
-
-let res=await api({
-action:"leaderboard"
-})
-
-let board=document.getElementById("board")
-
-board.innerHTML=""
-
-res.forEach((u,i)=>{
-
-let medal=""
-
-if(i==0) medal="🥇"
-else if(i==1) medal="🥈"
-else if(i==2) medal="🥉"
-else medal="#"+(i+1)
-
-board.innerHTML+=`
-
-<div class="flex justify-between border-b py-2">
-
-<span class="medal">${medal}</span>
-
-<span>XX${String(u[0]).slice(-4)}</span>
-
-<span>${u[1]} coins</span>
-
-</div>
-
-`
-
-})
-
-}
-
+async function loadLeaderboard(){let res=await api({action:"leaderboard"}),board=document.getElementById("board");board.innerHTML="";res.forEach((u,i)=>{let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1);board.innerHTML+=`<div class="flex justify-between border-b py-2"><span class="medal">${medal}</span><span>${u.mobile}</span><span>${u.coins} coins</span></div>`})}
 </script>
-
 </body>
 </html>

@@ -45,19 +45,29 @@ body{
 }
 .show{display:block;}
 
-/* ------------------ BUTTONS ------------------ */
-button{
-  font-weight:bold;
-  transition:0.3s;
-  cursor:pointer;
-  border:none;
-  border-radius:12px;
-}
-button:hover{
-  transform:scale(1.05);
-  box-shadow:0 0 10px #f97316,0 0 20px #facc15;
+/* ------------------ BUTTONS UPDATED ------------------ */
+button {
+  font-weight: bold;
+  transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Smooth animation */
+  cursor: pointer;
+  border: none;
+  /* Circle jaisa dikhne ke liye radius badha diya */
+  border-radius: 50px; 
+  /* Button ke andar ki space badha di */
+  padding: 10px 24px; 
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 14px;
 }
 
+button:hover {
+  transform: translateY(-3px) scale(1.05); /* Thoda upar uthega */
+  box-shadow: 0 10px 20px rgba(0,0,0,0.3); /* Soft shadow */
+}
+  
 /* ------------------ NEON HEADERS ------------------ */
 h1,h2,h3{
   text-shadow:0 0 5px #f97316,0 0 10px #facc15;
@@ -116,11 +126,11 @@ h1,h2,h3{
 
 <!-- APP -->
 <div id="app" class="hidden">
-<nav class="flex gap-2 mb-4">
-<button class="bg-orange-500" onclick="showTab('claim')">Claim Code</button>
-<button class="bg-yellow-500" onclick="showTab('wallet')">Wallet</button>
-<button class="bg-purple-600" onclick="showTab('leaderboard')">Leaderboard</button>
-</nav>
+  <nav class="flex justify-between gap-2 mb-6 bg-black/30 p-2 rounded-[40px]">
+    <button class="bg-orange-500 text-white flex-1" onclick="showTab('claim')">Claim</button>
+    <button class="bg-yellow-500 text-black flex-1" onclick="showTab('wallet')">Wallet</button>
+    <button class="bg-purple-600 text-white flex-1" onclick="showTab('leaderboard')">Board</button>
+  </nav>
 
 <!-- CLAIM -->
 <div id="claim" class="card">

@@ -1,52 +1,72 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
+
 <head>
 
-<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>EasyGo VIP</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
+
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+<link rel="icon" href="EasyGo-Logo.png">
 
 </head>
 
+
 <body class="bg-orange-50 min-h-screen flex items-center justify-center">
+
 
 <!-- LOADER -->
 
-<div id="loader" class="fixed inset-0 bg-black flex items-center justify-center text-white z-50">
+<div id="loader" class="fixed inset-0 bg-black flex items-center justify-center z-50">
 
-<div class="text-center">
+<div class="text-center text-white">
 
 <img src="EasyGo-Logo.png" class="h-24 mx-auto animate-bounce">
 
-<p class="mt-4 animate-pulse text-lg">
+<p class="mt-5 text-lg animate-pulse">
+
 Checking your VIP rewards...
+
 </p>
 
 </div>
 
 </div>
 
-<div class="max-w-md w-full p-5 space-y-5">
+
+
+<div class="max-w-md w-full p-5 space-y-6">
 
 <!-- LOGIN -->
 
-<div id="login" class="bg-white p-6 rounded-xl shadow">
+<div id="login" class="bg-white p-6 rounded-2xl shadow-xl">
 
-<h1 class="text-2xl font-bold text-center mb-4">
+<div class="text-center mb-6">
+
+<img src="EasyGo-Logo.png" class="h-16 mx-auto">
+
+<h1 class="text-2xl font-bold mt-3">
 
 EasyGo VIP
 
 </h1>
 
-<input id="mobile"
-placeholder="Enter mobile"
-class="w-full border p-3 rounded-lg">
+</div>
+
+<input id="mobile" placeholder="Enter Mobile Number"
+
+class="w-full border p-3 rounded-xl">
 
 <button onclick="login()"
-class="w-full bg-orange-500 text-white p-3 rounded-lg mt-4">
+
+class="mt-4 w-full bg-orange-500 text-white p-3 rounded-xl font-bold">
 
 Login
 
@@ -54,73 +74,151 @@ Login
 
 </div>
 
+
+
 <!-- APP -->
 
-<div id="app" class="hidden space-y-5">
+<div id="app" class="hidden space-y-6">
 
 <!-- WALLET -->
 
-<div class="bg-white p-6 rounded-xl shadow text-center">
+<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
 
-<h2 class="font-bold text-xl">
-
-Wallet
-
-</h2>
+<h2 class="text-xl font-bold">Wallet</h2>
 
 <div id="coins"
-class="text-5xl text-orange-500 font-bold mt-3">
+
+class="text-5xl text-orange-500 mt-3 font-bold">
 
 0
 
 </div>
 
-<p class="text-gray-500">
-Coins
+<p class="text-gray-500">Coins</p>
+
+<div id="tier" class="mt-2 font-bold"></div>
+
+</div>
+
+
+
+<!-- DAILY STREAK -->
+
+<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
+
+<h2 class="font-bold mb-3">
+
+🔥 Daily Streak
+
+</h2>
+
+<p id="streakText">
+
+Login daily to earn coins
+
 </p>
 
 </div>
 
-<!-- PROGRESS BAR -->
 
-<div class="bg-white p-6 rounded-xl shadow">
 
-<p class="mb-2 font-bold">
-Next Reward
-</p>
+<!-- SPIN WHEEL -->
 
-<div class="w-full bg-gray-200 h-4 rounded">
+<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
 
-<div id="progress"
-class="bg-orange-500 h-4 rounded"
-style="width:0%">
+<h2 class="font-bold mb-3">
+
+🎰 Daily Spin
+
+</h2>
+
+<button onclick="spin()"
+
+class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold">
+
+Spin Now
+
+</button>
+
+</div>
+
+
+
+<!-- MYSTERY BOX -->
+
+<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
+
+<h2 class="font-bold mb-3">
+
+🎁 Mystery Box
+
+</h2>
+
+<button onclick="mystery()"
+
+class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold">
+
+Open Box
+
+</button>
+
+</div>
+
+
+
+<!-- REFERRAL -->
+
+<div class="bg-white p-6 rounded-2xl shadow-xl">
+
+<h2 class="font-bold mb-3">
+
+Refer a Friend
+
+</h2>
+
+<div class="flex gap-2">
+
+<input id="refMobile"
+
+class="flex-1 border p-3 rounded-xl"
+
+placeholder="Friend Mobile">
+
+<button onclick="refer()"
+
+class="bg-blue-500 text-white px-5 rounded-xl font-bold">
+
+Add
+
+</button>
 
 </div>
 
 </div>
 
-<p id="progressText"
-class="text-sm mt-2 text-gray-600">
-0 / 100 coins
-</p>
 
-</div>
 
 <!-- CLAIM -->
 
-<div class="bg-white p-6 rounded-xl shadow">
+<div class="bg-white p-6 rounded-2xl shadow-xl">
 
 <h2 class="font-bold mb-3">
+
 Enter Secret Code
+
 </h2>
 
 <div class="flex gap-2">
 
 <input id="code"
-class="flex-1 border p-3 rounded">
+
+class="flex-1 border p-3 rounded-xl"
+
+placeholder="Enter Code">
 
 <button onclick="claim()"
-class="bg-orange-500 text-white px-5 rounded">
+
+class="bg-orange-500 text-white px-5 rounded-xl font-bold">
 
 Claim
 
@@ -130,22 +228,25 @@ Claim
 
 </div>
 
+
+
 <!-- LEADERBOARD -->
 
-<div class="bg-white p-6 rounded-xl shadow">
+<div class="bg-white p-6 rounded-2xl shadow-xl">
 
 <h2 class="font-bold mb-4">
 
-Leaderboard
+🏆 Top Foodies
 
 </h2>
 
 <div id="leaderboard"
-class="space-y-2">
+
+class="space-y-2"></div>
 
 </div>
 
-</div>
+
 
 <!-- ORDER -->
 
@@ -161,11 +262,15 @@ Order Now
 
 </div>
 
+
+
 <script>
 
 const API_URL="https://script.google.com/macros/s/AKfycbyldefvCSAHT7h1abihhwQUHAaIpJrk8K_9uOR93qGhfdeiXbJAcKXSK9hiDKdo-ykQzw/exec"
 
 let mobile=null
+
+
 
 async function api(data){
 
@@ -177,6 +282,8 @@ body:JSON.stringify(data)
 return await res.json()
 
 }
+
+
 
 window.onload=()=>{
 
@@ -195,13 +302,18 @@ loader.style.display="none"
 
 }
 
+
+
 function login(){
 
 mobile=document.getElementById("mobile").value
 
 if(mobile.length!=10){
-alert("Enter valid mobile")
+
+Swal.fire("Invalid number")
+
 return
+
 }
 
 localStorage.setItem("easygo_user",mobile)
@@ -210,11 +322,11 @@ startApp()
 
 }
 
+
+
 function startApp(){
 
-loginDiv=document.getElementById("login")
-
-loginDiv.classList.add("hidden")
+document.getElementById("login").classList.add("hidden")
 
 Promise.all([
 
@@ -224,11 +336,14 @@ loadLeaderboard()
 ]).then(()=>{
 
 loader.style.display="none"
-app.classList.remove("hidden")
+
+document.getElementById("app").classList.remove("hidden")
 
 })
 
 }
+
+
 
 async function loadWallet(){
 
@@ -239,23 +354,25 @@ mobile:mobile
 
 animateCoins(res.coins)
 
-updateProgress(res.coins)
+updateTier(res.coins)
 
 }
 
-function updateProgress(coins){
 
-let percent=(coins%100)
 
-percent=percent
+function updateTier(c){
 
-document.getElementById("progress")
-.style.width=percent+"%"
+let tier="Bronze"
 
-document.getElementById("progressText")
-.innerText=coins+" / 100 coins"
+if(c>300) tier="Silver"
+
+if(c>1000) tier="Gold"
+
+document.getElementById("tier").innerText="👑 "+tier
 
 }
+
+
 
 async function loadLeaderboard(){
 
@@ -272,27 +389,22 @@ res.forEach((u,i)=>{
 let medal=""
 
 if(i==0) medal="🥇"
+
 if(i==1) medal="🥈"
+
 if(i==2) medal="🥉"
+
+
 
 const div=document.createElement("div")
 
-div.className="flex justify-between bg-orange-50 p-3 rounded"
+div.className="flex justify-between bg-orange-50 p-3 rounded-xl"
+
+
 
 div.innerHTML=`
-
-<span>
-
-${medal} XX${String(u[0]).slice(-4)}
-
-</span>
-
-<span>
-
-${u[1]} coins
-
-</span>
-
+<span>${medal} XX${String(u[0]).slice(-4)}</span>
+<span>${u[1]} coins</span>
 `
 
 board.appendChild(div)
@@ -301,13 +413,23 @@ board.appendChild(div)
 
 }
 
+
+
 async function claim(){
 
 const code=document.getElementById("code").value
 
-const btn=event.target
+Swal.fire({
 
-btn.innerText="Checking..."
+title:"Checking code...",
+
+didOpen:()=>{
+
+Swal.showLoading()
+
+}
+
+})
 
 const res=await api({
 action:"claim",
@@ -317,22 +439,85 @@ code:code
 
 if(res.error){
 
-alert(res.error)
-btn.innerText="Claim"
+Swal.fire("Error",res.error,"error")
+
 return
 
 }
 
-confetti({
-particleCount:200,
-spread:90
-})
+confetti({particleCount:150,spread:70})
+
+Swal.fire("Success","You earned "+res.coins+" coins!","success")
 
 loadWallet()
 
-btn.innerText="Claim"
+}
+
+
+
+async function refer(){
+
+const friend=document.getElementById("refMobile").value
+
+const res=await api({
+
+action:"refer",
+
+mobile:mobile,
+
+friend:friend
+
+})
+
+if(res.success){
+
+Swal.fire("Pending","Waiting for friend to join")
+
+}else{
+
+Swal.fire(res.error)
 
 }
+
+}
+
+
+
+function spin(){
+
+const rewards=[5,10,15,20]
+
+const win=rewards[Math.floor(Math.random()*rewards.length)]
+
+confetti()
+
+Swal.fire(
+
+"🎰 You won "+win+" coins!"
+
+)
+
+}
+
+
+
+function mystery(){
+
+const rewards=[10,25,50]
+
+const win=rewards[Math.floor(Math.random()*rewards.length)]
+
+confetti()
+
+Swal.fire(
+
+"🎁 Mystery reward: "+win+" coins!"
+
+)
+
+}
+
+
 
 function animateCoins(target){
 
@@ -347,6 +532,7 @@ current+=3
 if(current>=target){
 
 current=target
+
 clearInterval(interval)
 
 }
@@ -360,4 +546,5 @@ el.innerText=current
 </script>
 
 </body>
+
 </html>

@@ -23,7 +23,7 @@ body{
   background:rgba(0,0,0,0.6);
   backdrop-filter:blur(10px);
   padding:20px;
-  border-radius:16px;
+  border-radius:26px;
   box-shadow:0 10px 30px rgba(0,0,0,0.5);
   animation:fadeUp .5s;
 }
@@ -151,7 +151,7 @@ h1,h2,h3{
 </div>
 
 <script>
-const API="https://script.google.com/macros/s/AKfycby8809DKT91EJ_DxYHv1fkUs90yqQ_rV4AZxWKfi2lVBwGFwvzxyIJn62fBLEq55dfs/exec";
+const API="https://script.google.com/macros/s/AKfycbz6pHOQ6sqxRYfQPW8lL2SbfDQX6ok4xFEQZJmntoUyiNPSCKBu6M5F4oEJpVTsy1D3/exec"; 
 let mobile=null, generatedOTP=null;
 
 function popup(msg){ const p=document.getElementById("popup"); p.innerText=msg; p.classList.add("show"); setTimeout(()=>p.classList.remove("show"),3000); }
@@ -223,19 +223,24 @@ async function claimCode(){
 }
 
 /* REFERRAL */
-function toggleReferral(){ document.getElementById("refBox").classList.toggle("hidden") }
 async function referFriend(){
   let friend=document.getElementById("refMobile").value;
   if(friend.length!=10){popup("Enter valid mobile");return;}
-  let res=await api({action:"refer",mobile,friend});
+  
+  let res=await api({action:"refer", mobile, friend});
+  
   if(res.success){
     popup(res.message);
-    // WhatsApp share
-    let msg=`Join EasyGo VIP Rewards! Claim your coins and goodies. My invite code: ${mobile}`;
+
+    // Generate heartwarming WhatsApp message
+    let msg=`Hey! 🌟 I've just invited you to join EasyGo VIP Rewards! 🍔🎉
+You get Coins, Goodies and Milestones when you Claim your *First Code.*
+*Sign in now:* https://clean-scripts.github.io/Easygo-Points/
+_Let's enjoy Rewards Together!_ 🚀`;
+
     let url=`https://api.whatsapp.com/send?text=${encodeURIComponent(msg)}`;
     window.open(url,'_blank');
-    loadWallet();
-  } else popup(res.error)
+  } else popup(res.error);
 }
 
 /* LEADERBOARD */

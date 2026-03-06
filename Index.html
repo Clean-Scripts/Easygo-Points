@@ -1,0 +1,424 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>EasyGo VIP — Interactive</title>
+
+  <!-- Tailwind CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>tailwind.config = { theme: { extend: { colors: { easyOrange: '#f97316', easyDark: '#0f172a' }}}}</script>
+
+  <!-- Font Awesome (icons) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+  <!-- Confetti -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <!-- Favicon (place EasyGo-Logo.png alongside this HTML) -->
+  <link rel="icon" href="EasyGo-Logo.png" />
+
+  <style>
+    html,body,#app{height:100%;}
+    body{background: #0b1220; font-family: Inter, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;}
+
+    /* backdrop using provided background image (place background.png next to this file) */
+    .app-bg{
+      background-image: url('background.png');
+      background-size: cover;
+      background-position: center;
+      filter: saturate(1.05) brightness(0.85);
+    }
+
+    /* OTP boxes */
+    .otp-box{width:3.25rem;height:3.25rem;border-radius:12px;border:2px dashed rgba(255,255,255,0.08);display:flex;align-items:center;justify-content:center;font-weight:700;font-size:1.15rem;background:rgba(255,255,255,0.02)}
+
+    /* small animations */
+    @keyframes pulse-slow{0%{transform:scale(1)}50%{transform:scale(1.02)}100%{transform:scale(1)}}
+    .pulse-slow{animation:pulse-slow 2.5s ease-in-out infinite}
+
+    /* hide mobile tiny scrollbars */
+    ::-webkit-scrollbar{display:none}
+  </style>
+</head>
+<body class="min-h-screen flex items-center justify-center p-6">
+  <div id="app" class="w-full max-w-3xl h-[92vh] bg-gradient-to-br from-[#071226]/80 to-[#071226]/60 rounded-3xl overflow-hidden shadow-2xl relative ring-1 ring-white/5">
+
+    <!-- Background layer (blurred) -->
+    <div class="absolute inset-0 app-bg opacity-60 -z-10"></div>
+
+    <!-- Header -->
+    <header class="flex items-center gap-4 px-6 py-4 border-b border-white/5 bg-gradient-to-b from-transparent to-white/2">
+      <img src="EasyGo-Logo.png" alt="EasyGo" class="w-14 h-14 rounded-full bg-white/5 p-1 object-contain shadow" />
+      <div>
+        <h1 class="text-white text-2xl font-extrabold tracking-tight">Easy<span class="text-yellow-300">Go</span> VIP Streak</h1>
+        <p class="text-sm text-slate-300">Interactive rewards — login with mobile, claim codes, and climb the leaderboard.</p>
+      </div>
+      <div class="ml-auto flex items-center gap-3">
+        <button id="demoResetBtn" class="text-xs bg-white/5 text-white px-3 py-1 rounded-lg">Reset Demo</button>
+      </div>
+    </header>
+
+    <!-- Main grid -->
+    <main class="p-6 grid grid-cols-1 md:grid-cols-3 gap-6 h-[calc(100%-84px)] overflow-hidden">
+
+      <!-- Left column: Login / QR / Wallet -->
+      <section class="col-span-1 md:col-span-1 bg-white/5 rounded-2xl p-5 flex flex-col gap-5 overflow-auto">
+
+        <!-- QR + Instruction -->
+        <div class="flex items-center gap-3">
+          <div class="w-14 h-14 rounded-xl bg-white/3 flex items-center justify-center">
+            <i class="fa-solid fa-qrcode text-white text-2xl"></i>
+          </div>
+          <div>
+            <p class="text-sm text-slate-200 font-semibold">QR Login</p>
+            <p class="text-xs text-slate-300">Customers can scan QR placed on receipt / counter to open this page and login with their number.</p>
+          </div>
+        </div>
+
+        <!-- Mobile number input -->
+        <div class="space-y-3">
+          <label class="text-xs text-slate-300 font-medium">Mobile Number</label>
+          <div class="flex gap-2">
+            <input id="mobileInput" type="tel" maxlength="10" placeholder="Enter 10-digit mobile" class="flex-1 px-4 py-3 rounded-xl bg-white/5 placeholder:text-slate-400 text-white outline-none" />
+            <button id="getOtpBtn" class="bg-easyOrange px-4 py-3 rounded-xl font-bold text-white">Get OTP</button>
+          </div>
+
+          <div id="otpRevealBox" class="hidden mt-2 bg-white/6 p-3 rounded-lg">
+            <p class="text-xs text-slate-200">In this interactive demo OTP is delivered inside the app UI (no external SMS). Use it to login.</p>
+            <div id="otpBubble" class="mt-2 inline-flex items-center gap-3 px-3 py-2 rounded-full bg-white/10 text-white font-semibold">
+              <i class="fa-solid fa-mobile-screen-button"></i>
+              <span id="otpValue">----</span>
+            </div>
+          </div>
+
+          <div id="otpBoxes" class="hidden flex gap-2 mt-2">
+            <div class="otp-box text-white" id="box0">-</div>
+            <div class="otp-box text-white" id="box1">-</div>
+            <div class="otp-box text-white" id="box2">-</div>
+            <div class="otp-box text-white" id="box3">-</div>
+          </div>
+
+          <div id="otpVerifyArea" class="hidden flex gap-2 mt-3">
+            <input id="otpInput" type="text" maxlength="4" placeholder="Enter OTP" class="px-4 py-2 rounded-xl bg-white/6 text-white outline-none flex-1" />
+            <button id="verifyBtn" class="bg-green-500 px-4 py-2 rounded-xl text-white font-bold">Verify</button>
+          </div>
+        </div>
+
+        <!-- Quick demo login / fallback -->
+        <div class="mt-2 text-xs text-slate-300">Note: Replace <code>API_URL</code> in the script with your Google Apps Script webapp URL to use Sheets as backend. The page includes a localStorage demo fallback so you can test immediately.</div>
+
+        <!-- Wallet preview -->
+        <div id="walletCard" class="mt-4 p-4 rounded-xl bg-gradient-to-br from-[#071026]/60 to-[#08152a]/40 border border-white/5 shadow flex flex-col gap-2">
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-xs text-slate-300">Total Coins</div>
+              <div id="coinCounter" class="text-3xl font-extrabold text-yellow-300">0</div>
+            </div>
+            <div class="text-right">
+              <div class="text-xs text-slate-400">Last earned</div>
+              <div id="lastEarned" class="text-sm font-semibold text-green-300">-</div>
+            </div>
+          </div>
+
+          <div class="mt-3 flex gap-2">
+            <button id="openWalletHistory" class="flex-1 rounded-lg bg-white/5 px-3 py-2 text-sm">View History</button>
+            <button id="openClaim" class="rounded-lg bg-easyOrange px-3 py-2 text-sm text-white">Enter Code</button>
+          </div>
+        </div>
+
+        <!-- Referral quick -->
+        <div class="mt-3 bg-white/5 p-3 rounded-lg">
+          <p class="text-xs text-slate-300 font-semibold">Refer a friend</p>
+          <div class="flex gap-2 mt-2">
+            <input id="refNum" placeholder="Friend's mobile" maxlength="10" class="flex-1 px-3 py-2 rounded-lg bg-white/6 text-white outline-none" />
+            <button id="refBtn" class="bg-blue-500 px-3 py-2 rounded-lg text-white font-bold">Refer</button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-2">Referral bonus: <strong>40 coins</strong> on friend's first login.</p>
+        </div>
+
+      </section>
+
+      <!-- Middle column: Claim code, Spin, History -->
+      <section class="col-span-1 md:col-span-1 bg-white/5 rounded-2xl p-5 overflow-auto flex flex-col gap-5">
+
+        <!-- Claim code area -->
+        <div class="p-4 rounded-xl bg-gradient-to-br from-white/3 to-white/5 border border-white/5">
+          <h3 class="text-white font-bold">Claim Secret Code</h3>
+          <p class="text-xs text-slate-300 mt-1">Found on your latest EasyGo order receipt. Enter to instantly add coins.</p>
+
+          <div class="mt-3 flex gap-3 items-center">
+            <input id="secretInput" placeholder="Enter 7-digit code" class="flex-1 px-4 py-2 rounded-xl bg-white/6 text-white outline-none font-mono tracking-widest" />
+            <button id="claimBtn" class="bg-easyOrange px-4 py-2 rounded-xl font-bold text-white">Claim</button>
+          </div>
+          <div class="mt-3 text-xs text-slate-400">Correct code gives +10 coins (demo). Replace with server validation for real codes.</div>
+        </div>
+
+        <!-- Spin wheel (simple) -->
+        <div class="p-4 rounded-xl bg-white/6">
+          <div class="flex items-center justify-between">
+            <div>
+              <h4 class="text-white font-semibold">Daily Spin</h4>
+              <p class="text-xs text-slate-300">Try your luck — once per day for demo.</p>
+            </div>
+            <button id="spinBtn" class="bg-yellow-400 text-black px-4 py-2 rounded-lg font-bold">Spin</button>
+          </div>
+          <div id="spinResult" class="mt-4 text-sm text-slate-200">--</div>
+        </div>
+
+        <!-- History list -->
+        <div class="p-3 rounded-xl bg-white/6 flex-1 overflow-auto">
+          <h4 class="text-white font-semibold mb-2">Wallet History</h4>
+          <ul id="historyList" class="space-y-2 text-sm text-slate-200"></ul>
+        </div>
+
+      </section>
+
+      <!-- Right column: Leaderboard + CTA -->
+      <section class="col-span-1 md:col-span-1 bg-white/5 rounded-2xl p-5 flex flex-col gap-4 overflow-auto">
+
+        <div class="flex items-center justify-between">
+          <h3 class="text-white font-bold">Leaderboard</h3>
+          <button id="refreshLb" class="text-xs bg-white/6 px-3 py-1 rounded">Refresh</button>
+        </div>
+
+        <ol id="leaderboard" class="space-y-3"></ol>
+
+        <div class="mt-auto">
+          <a href="https://clean-scripts.github.io/Easygo-Menu/" class="block text-center w-full bg-red-600 hover:bg-red-700 text-white font-bold py-3 rounded-xl shadow-lg">Place Order Now 🍔</a>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- Toast -->
+    <div id="toast" class="fixed left-1/2 -translate-x-1/2 bottom-8 bg-slate-900 text-white px-6 py-3 rounded-full shadow-lg opacity-0 pointer-events-none transition-all"></div>
+
+    <!-- small footer hint -->
+    <div class="absolute bottom-4 left-6 text-xs text-slate-400">Powered by EasyGo • Demo mode</div>
+  </div>
+
+  <!-- SCRIPT: Interactivity + backend hooks (replace API_URL) -->
+  <script>
+    /* ---------- CONFIG: replace API_URL with your Google Apps Script web app URL ---------- */
+    const API_URL = 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'; // <-- REPLACE for real backend
+    const USE_BACKEND = false; // set to true after you deploy GAS and allow CORS (or use proxy)
+
+    // Demo storage keys
+    const STORAGE_KEY = 'easygo_demo_user';
+
+    // utility toast
+    const toastEl = document.getElementById('toast');
+    function showToast(msg, type='default'){
+      toastEl.innerText = msg;
+      toastEl.classList.remove('opacity-0');
+      toastEl.style.opacity = '1';
+      toastEl.style.pointerEvents = 'auto';
+      setTimeout(()=>{ toastEl.classList.add('opacity-0'); toastEl.style.pointerEvents='none'; }, 3000);
+    }
+
+    // confetti helper
+    function doConfetti(){ confetti({ particleCount: 90, spread: 70, origin: { y: 0.6 }, colors: ['#f97316','#eab308','#22c55e'] }); }
+
+    // Demo backend (localStorage) for quick testing
+    function demo_loadUser(mobile){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const db = raw ? JSON.parse(raw) : { users: {}, transactions: {}, leaderboard: {} };
+      if(!db.users[mobile]){
+        db.users[mobile] = { mobile, coins: 0, history: [] };
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+      }
+      return db.users[mobile];
+    }
+    function demo_saveTransaction(mobile, tx){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const db = raw ? JSON.parse(raw) : { users: {}, transactions: {}, leaderboard: {} };
+      db.users[mobile] = db.users[mobile] || { mobile, coins: 0, history: [] };
+      db.users[mobile].history.unshift(tx);
+      db.users[mobile].coins += tx.coins;
+      // leaderboard
+      db.leaderboard[mobile] = db.users[mobile].coins;
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(db));
+    }
+    function demo_getLeaderboard(){
+      const raw = localStorage.getItem(STORAGE_KEY);
+      const db = raw ? JSON.parse(raw) : { users: {}, transactions: {}, leaderboard: {} };
+      const arr = Object.keys(db.leaderboard).map(m=>({ mobile: m, coins: db.leaderboard[m], name: m.slice(0,3)+'***' }));
+      arr.sort((a,b)=>b.coins - a.coins);
+      return arr;
+    }
+
+    // UI elements
+    const mobileInput = document.getElementById('mobileInput');
+    const getOtpBtn = document.getElementById('getOtpBtn');
+    const otpRevealBox = document.getElementById('otpRevealBox');
+    const otpValueEl = document.getElementById('otpValue');
+    const otpBoxes = document.getElementById('otpBoxes');
+    const otpVerifyArea = document.getElementById('otpVerifyArea');
+    const otpInput = document.getElementById('otpInput');
+    const verifyBtn = document.getElementById('verifyBtn');
+    const coinCounter = document.getElementById('coinCounter');
+    const lastEarned = document.getElementById('lastEarned');
+    const historyList = document.getElementById('historyList');
+    const claimBtn = document.getElementById('claimBtn');
+    const secretInput = document.getElementById('secretInput');
+    const refBtn = document.getElementById('refBtn');
+    const refNum = document.getElementById('refNum');
+    const spinBtn = document.getElementById('spinBtn');
+    const spinResult = document.getElementById('spinResult');
+    const leaderboardEl = document.getElementById('leaderboard');
+    const refreshLb = document.getElementById('refreshLb');
+    const openWalletHistory = document.getElementById('openWalletHistory');
+    const openClaim = document.getElementById('openClaim');
+    const demoResetBtn = document.getElementById('demoResetBtn');
+
+    let currentOTP = null;
+    let currentMobile = null;
+
+    // Fill OTP boxes visually when showing OTP
+    function setOtpBoxes(str){
+      for(let i=0;i<4;i++){ document.getElementById('box'+i).innerText = (str && str[i])?str[i]:'-'; }
+    }
+
+    // Generate & reveal OTP (interactive in-app delivery)
+    getOtpBtn.addEventListener('click', ()=>{
+      const num = mobileInput.value.trim();
+      if(!/^\d{10}$/.test(num)) return showToast('Enter valid 10-digit mobile');
+      currentMobile = num;
+      // create (mock) OTP
+      currentOTP = String(Math.floor(1000 + Math.random()*9000));
+      otpRevealBox.classList.remove('hidden');
+      otpBoxes.classList.remove('hidden');
+      otpVerifyArea.classList.remove('hidden');
+      otpValueEl.innerText = currentOTP;
+      setOtpBoxes(currentOTP);
+      showToast('OTP delivered in-app');
+
+      // auto-focus and auto-fill demo (shows magic feel)
+      otpInput.value = currentOTP;
+      setTimeout(()=>{ otpInput.select(); }, 400);
+    });
+
+    verifyBtn.addEventListener('click', async ()=>{
+      const val = otpInput.value.trim();
+      if(!/^[0-9]{4}$/.test(val)) return showToast('Enter 4-digit OTP');
+      if(val !== currentOTP) return showToast('Wrong OTP — try again');
+
+      // Successful login
+      showToast('Login successful', 'success');
+      doConfetti();
+
+      // Load user (demo or backend)
+      if(USE_BACKEND){
+        // call backend login endpoint — example payload
+        try{
+          const resp = await fetch(API_URL, {method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify({action:'login', mobile: currentMobile})});
+          const data = await resp.json();
+          // TODO: integrate backend response
+          console.log('backend login response', data);
+        }catch(e){ console.error(e); showToast('Backend error — check API_URL and CORS'); }
+      }
+
+      // demo local load
+      const user = demo_loadUser(currentMobile);
+      updateUIWithUser(user);
+    });
+
+    // update UI with user data
+    function updateUIWithUser(user){
+      currentMobile = user.mobile;
+      coinCounter.innerText = user.coins;
+      lastEarned.innerText = user.history && user.history[0] ? (user.history[0].coins + ' on ' + new Date(user.history[0].date).toLocaleDateString()) : '-';
+      // history
+      renderHistory(user.history || []);
+      renderLeaderboard();
+    }
+
+    function renderHistory(h){
+      historyList.innerHTML = '';
+      if(!h || h.length===0){ historyList.innerHTML = '<li class="text-slate-400">No transactions yet</li>'; return; }
+      for(const tx of h){
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between bg-white/3 px-3 py-2 rounded-lg';
+        li.innerHTML = `<div class=\"flex items-center gap-3\"><div class=\"w-9 h-9 rounded-md bg-white/5 flex items-center justify-center\">${tx.coins>0?'+':tx.coins<0?'-':' '}</div><div><div class=\"text-sm font-semibold\">${tx.title}</div><div class=\"text-xs text-slate-300\">${new Date(tx.date).toLocaleString()}</div></div></div><div class=\"font-bold text-yellow-300\">${tx.coins>0?'+':''}${tx.coins}</div>`;
+        historyList.appendChild(li);
+      }
+    }
+
+    // Claim code
+    claimBtn.addEventListener('click', ()=>{
+      const code = secretInput.value.trim();
+      if(!code) return showToast('Please enter a code');
+      if(!currentMobile) return showToast('Login first to claim');
+      // demo: any 5+ char code gives +10 coins
+      const coins = 10;
+      demo_saveTransaction(currentMobile, { title: 'Secret Code '+code, coins, date: new Date().toISOString(), code });
+      const user = demo_loadUser(currentMobile);
+      updateUIWithUser(user);
+      secretInput.value='';
+      showToast('🎉 Claimed '+coins+' coins', 'success');
+      doConfetti();
+    });
+
+    // Referral
+    refBtn.addEventListener('click', ()=>{
+      const f = refNum.value.trim();
+      if(!/^\d{10}$/.test(f)) return showToast('Enter friend mobile');
+      if(!currentMobile) return showToast('Login first');
+      // demo logic: if friend not exist, create friend then credit current user 40 coins
+      const friend = demo_loadUser(f);
+      // if friend had zero history, simulate this is first login and credit
+      demo_saveTransaction(currentMobile, { title: 'Referral bonus for '+f, coins: 40, date: new Date().toISOString(), code: 'REF' });
+      updateUIWithUser(demo_loadUser(currentMobile));
+      refNum.value='';
+      showToast('🔥 Referral credited (40 coins)');
+      doConfetti();
+    });
+
+    // Spin wheel (random simple)
+    spinBtn.addEventListener('click', ()=>{
+      if(!currentMobile) return showToast('Login to use spin');
+      const pool = [0,5,10,20,0,10];
+      const picked = pool[Math.floor(Math.random()*pool.length)];
+      spinResult.innerText = picked>0?('You won '+picked+' coins!'):('No luck, try tomorrow');
+      if(picked>0){ demo_saveTransaction(currentMobile, { title: 'Daily Spin', coins: picked, date: new Date().toISOString(), code: 'SPIN'}); updateUIWithUser(demo_loadUser(currentMobile)); doConfetti(); }
+    });
+
+    // Leaderboard render
+    function renderLeaderboard(){
+      const arr = demo_getLeaderboard();
+      leaderboardEl.innerHTML = '';
+      if(arr.length===0) leaderboardEl.innerHTML = '<div class="text-slate-400 text-sm">No players yet</div>';
+      arr.slice(0,10).forEach((p, i)=>{
+        const li = document.createElement('li');
+        li.className = 'flex items-center justify-between bg-white/3 px-3 py-2 rounded-lg';
+        li.innerHTML = `<div class=\"flex items-center gap-3\"><div class=\"w-9 h-9 rounded-full bg-yellow-400 text-black flex items-center justify-center font-bold\">${i+1}</div><div><div class=\"text-sm font-semibold\">${p.name}</div><div class=\"text-xs text-slate-300\">${p.mobile}</div></div></div><div class=\"font-bold text-yellow-300\">${p.coins}</div>`;
+        leaderboardEl.appendChild(li);
+      });
+    }
+
+    refreshLb.addEventListener('click', renderLeaderboard);
+
+    openWalletHistory.addEventListener('click', ()=>{ window.scrollTo({top:document.body.scrollHeight, behavior:'smooth'}); showToast('Scroll to history'); });
+    openClaim.addEventListener('click', ()=>{ document.getElementById('secretInput').focus(); });
+
+    demoResetBtn.addEventListener('click', ()=>{ localStorage.removeItem(STORAGE_KEY); showToast('Demo reset'); renderLeaderboard(); coinCounter.innerText='0'; historyList.innerHTML=''; lastEarned.innerText='-'; });
+
+    // initial render
+    renderLeaderboard();
+
+    // Helpful: if URL contains ?mobile=9876543210 (QR flow), prefill and auto open
+    (function checkQuery(){
+      const qp = new URLSearchParams(location.search);
+      const m = qp.get('mobile');
+      if(m && /^\d{10}$/.test(m)){ mobileInput.value = m; setTimeout(()=>{ getOtpBtn.click(); }, 600); }
+    })();
+
+    // small accessibility: type OTP to boxes
+    otpInput.addEventListener('input', ()=>{ setOtpBoxes(otpInput.value.padEnd(4,'-').slice(0,4)); });
+
+  </script>
+
+</body>
+</html>

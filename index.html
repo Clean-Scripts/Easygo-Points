@@ -186,6 +186,13 @@
                     <input id="refMobile" placeholder="Friend Mobile" class="w-full p-3 text-black rounded-xl outline-none">
                     <button onclick="referFriend()" class="bg-green-600 text-white w-full">Send & Share</button>
                 </div>
+                <div class="mt-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-lg flex items-start space-x-3 shadow-sm">
+                    <i class="fa-solid fa-clock-rotate-left text-red-500 mt-1 animate-pulse"></i>
+                    <div class="text-left text-xs text-red-700">
+                        <p class="font-bold">⚠️ Use it or Lose it!</p>
+                        <p>Aapke kamaye hue coins <strong>60 Days</strong> ke baad expire hone lagenge. Jo coins jis din mile hain, theek 60 din baad automatically zero ho jayenge. Aaj hi order karein!</p>
+                    </div>
+                </div>
             </div>
 
             <div id="leaderboard" class="card hidden">
@@ -253,11 +260,16 @@
         }
 
         const milestonesArr = [
-            { coins: 100, text: "2 Cheese Ball" },
-            { coins: 200, text: "2 Cheese Corn Nuggets" },
-            { coins: 400, text: "4 Spring Rolls" },
-            { coins: 700, text: "90g French Fries" },
-            { coins: 900, text: "Veg Steam Momos [7 Pcs]" }
+    { coins: 50, text: "2 Pcs Crispy Mini Samosas (Free with any order)" },
+    { coins: 100, text: "2 Pcs Crunchy Cheese Balls" },
+    { coins: 150, text: "Half Portion French Fries 🍟" },
+    { coins: 200, text: "3 Pcs Cheese Corn Nuggets" },
+    { coins: 250, text: "Half Plate Veg Momos 🥟" },
+    { coins: 300, text: "Full Plate French Fries" },
+    { coins: 350, text: "Half Plate Premium Paneer Momos" },
+    { coins: 400, text: "Full Plate Veg Momos" },
+    { coins: 450, text: "Full Plate Cheese Corn Nuggets" },
+    { coins: 500, text: "VIP Feast: Full Plate Cheese Corn Momos + Fries! 👑" }
         ];
 
         async function loadWallet() {

@@ -3,13 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>EasyGo VIP</title>
 
 <script src="https://cdn.tailwindcss.com"></script>
-
 <link rel="icon" href="EasyGo-Logo.png">
-
 <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
 </head>
@@ -17,136 +14,72 @@
 <body class="bg-orange-50 min-h-screen flex items-center justify-center">
 
 <!-- LOADER -->
-
 <div id="loader" class="fixed inset-0 bg-black flex items-center justify-center z-50">
-
 <div class="text-center text-white">
-
 <img src="EasyGo-Logo.png" class="h-24 mx-auto animate-bounce">
-
-<p class="mt-5 text-lg animate-pulse">
-Checking your VIP rewards...
-</p>
-
+<p class="mt-5 text-lg animate-pulse">Checking your VIP rewards...</p>
+</div>
 </div>
 
-</div>
-
-
-<div class="max-w-md w-full p-5">
+<div class="max-w-md w-full p-5 space-y-6">
 
 <!-- LOGIN -->
-
 <div id="login" class="bg-white p-6 rounded-2xl shadow-xl">
-
 <div class="text-center mb-6">
-
 <img src="EasyGo-Logo.png" class="h-16 mx-auto">
-
-<h1 class="text-2xl font-bold mt-3">
-EasyGo VIP
-</h1>
-
+<h1 class="text-2xl font-bold mt-3">EasyGo VIP</h1>
 </div>
 
-<input id="mobile"
-placeholder="Enter Mobile Number"
-class="w-full border p-3 rounded-xl">
+<input id="mobile" placeholder="Enter Mobile Number" class="w-full border p-3 rounded-xl">
 
-<button onclick="login()"
-class="mt-4 w-full bg-orange-500 text-white p-3 rounded-xl font-bold">
-
-Login
-
-</button>
-
+<button onclick="login()" class="mt-4 w-full bg-orange-500 text-white p-3 rounded-xl font-bold">Login</button>
 </div>
 
 
 <!-- APP -->
-
 <div id="app" class="hidden space-y-6">
 
 <!-- WALLET -->
-
 <div class="bg-white p-6 rounded-2xl shadow-xl text-center">
+<h2 class="text-xl font-bold">Wallet</h2>
+<div id="coins" class="text-5xl text-orange-500 mt-3 font-bold">0</div>
+<p class="text-gray-500">Coins</p>
 
-<h2 class="text-xl font-bold">
-Wallet
-</h2>
-
-<div id="coins"
-class="text-5xl text-orange-500 mt-3 font-bold">
-
-0
-
+<button onclick="showReferral()" class="mt-4 bg-blue-500 text-white px-4 py-2 rounded-lg font-bold">
+Refer a Friend
+</button>
 </div>
 
-<p class="text-gray-500">
-Coins
-</p>
-
+<!-- REFERRAL -->
+<div id="referralBox" class="hidden bg-white p-6 rounded-2xl shadow-xl">
+<h2 class="font-bold mb-3">Refer Friend</h2>
+<div class="flex gap-2">
+<input id="refMobile" class="flex-1 border p-3 rounded-xl" placeholder="Friend Mobile">
+<button onclick="refer()" class="bg-blue-500 text-white px-5 rounded-xl font-bold">Add</button>
 </div>
-
+</div>
 
 <!-- CLAIM CODE -->
-
 <div class="bg-white p-6 rounded-2xl shadow-xl">
-
-<h2 class="font-bold mb-3">
-
-Enter Secret Code
-
-</h2>
-
+<h2 class="font-bold mb-3">Enter Secret Code</h2>
 <div class="flex gap-2">
-
-<input id="code"
-class="flex-1 border p-3 rounded-xl"
-placeholder="Enter Code">
-
-<button onclick="claim()"
-class="bg-orange-500 text-white px-5 rounded-xl font-bold">
-
-Claim
-
-</button>
-
+<input id="code" class="flex-1 border p-3 rounded-xl" placeholder="Enter Code">
+<button onclick="claim()" class="bg-orange-500 text-white px-5 rounded-xl font-bold">Claim</button>
 </div>
-
 </div>
 
 
 <!-- LEADERBOARD -->
-
 <div class="bg-white p-6 rounded-2xl shadow-xl">
-
-<h2 class="font-bold mb-4">
-
-Top Foodies
-
-</h2>
-
-<div id="leaderboard" class="space-y-2">
-
+<h2 class="font-bold mb-4">Top Foodies</h2>
+<div id="leaderboard" class="space-y-2"></div>
 </div>
-
-</div>
-
 
 <!-- ORDER -->
-
-<a href="https://clean-scripts.github.io/Easygo-Menu/"
-class="block text-center bg-red-600 text-white p-4 rounded-xl font-bold">
-
-Place Order Now
-
-</a>
+<a href="https://clean-scripts.github.io/Easygo-Menu/" class="block text-center bg-red-600 text-white p-4 rounded-xl font-bold">Place Order Now</a>
 
 </div>
-
 </div>
-
 
 
 <script>
@@ -156,20 +89,16 @@ const API_URL="https://script.google.com/macros/s/AKfycbzLcPIGwU4FqAkA3sGNCxFrcn
 let mobile=null
 
 
-
 async function api(data){
 
 const res=await fetch(API_URL,{
-
 method:"POST",
 body:JSON.stringify(data)
-
 })
 
 return await res.json()
 
 }
-
 
 
 function maskMobile(m){
@@ -181,29 +110,46 @@ return "XX"+m.slice(-4)
 }
 
 
+window.onload=()=>{
+
+const saved=localStorage.getItem("easygo_user")
+
+if(saved){
+mobile=saved
+startApp()
+}
+else{
+document.getElementById("loader").style.display="none"
+}
+
+}
+
 
 async function login(){
 
 mobile=document.getElementById("mobile").value
 
 if(mobile.length!=10){
-
 alert("Enter valid mobile")
-
 return
+}
+
+localStorage.setItem("easygo_user",mobile)
+
+startApp()
 
 }
+
+
+function startApp(){
 
 document.getElementById("login").classList.add("hidden")
 
 document.getElementById("loader").style.display="flex"
 
 Promise.all([
-
 loadWallet(),
-
 loadLeaderboard()
-
 ]).then(()=>{
 
 document.getElementById("loader").style.display="none"
@@ -215,14 +161,11 @@ document.getElementById("app").classList.remove("hidden")
 }
 
 
-
 async function loadWallet(){
 
 const res=await api({
-
-action:"wallet",
+action:"login",
 mobile:mobile
-
 })
 
 animateCoins(res.coins)
@@ -230,39 +173,27 @@ animateCoins(res.coins)
 }
 
 
-
 async function loadLeaderboard(){
 
 const res=await api({
-
 action:"leaderboard"
-
 })
 
 const board=document.getElementById("leaderboard")
 
 board.innerHTML=""
 
-res.forEach((u,i)=>{
+res.forEach((u)=>{
 
 const div=document.createElement("div")
 
+
 div.className="flex justify-between bg-orange-50 p-3 rounded-xl"
 
+
 div.innerHTML=`
-
-<span class="font-bold">
-
-${maskMobile(u[0])}
-
-</span>
-
-<span>
-
-${u[1]} Coins
-
-</span>
-
+<span class="font-bold">${maskMobile(u[0])}</span>
+<span>${u[1]} Coins</span>
 `
 
 board.appendChild(div)
@@ -272,39 +203,59 @@ board.appendChild(div)
 }
 
 
-
 async function claim(){
 
 const code=document.getElementById("code").value
 
 const res=await api({
-
 action:"claim",
 mobile:mobile,
 code:code
-
 })
 
 if(res.error){
-
 alert(res.error)
-
 return
-
 }
 
-confetti({
-
-particleCount:150,
-spread:70,
-origin:{y:0.6}
-
-})
+confetti({particleCount:150,spread:70,origin:{y:0.6}})
 
 loadWallet()
 
 }
 
+
+function showReferral(){
+
+document.getElementById("referralBox").classList.toggle("hidden")
+
+}
+
+
+async function refer(){
+
+const friend=document.getElementById("refMobile").value
+
+if(friend.length!=10){
+alert("Enter valid mobile")
+return
+}
+
+const res=await api({
+action:"refer",
+mobile:mobile,
+friend:friend
+})
+
+if(res.success){
+alert("Referral Added")
+loadWallet()
+}
+else{
+alert(res.error)
+}
+
+}
 
 
 function animateCoins(target){
@@ -318,10 +269,8 @@ const interval=setInterval(()=>{
 current+=3
 
 if(current>=target){
-
 current=target
 clearInterval(interval)
-
 }
 
 el.innerText=current

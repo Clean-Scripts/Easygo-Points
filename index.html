@@ -1,389 +1,392 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
+
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width,initial-scale=1">
 
 <title>EasyGo Rewards</title>
 
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
+<script src="https://cdn.tailwindcss.com"></script>
+
+<link rel="icon" href="EasyGo-Logo.png">
 
 <style>
 
-*{
-margin:0;
-padding:0;
-box-sizing:border-box;
-font-family:Poppins;
-}
-
 body{
-
-background:linear-gradient(135deg,#020024,#090979,#00d4ff);
-min-height:100vh;
-display:flex;
-justify-content:center;
-align-items:center;
-color:white;
-
+background:url("background.jpg");
+background-size:cover;
+background-position:center;
 }
 
-.container{
-
-width:95%;
-max-width:1100px;
-
-background:rgba(255,255,255,0.05);
-
-backdrop-filter:blur(20px);
-
-border-radius:20px;
-
-padding:25px;
-
-box-shadow:0 0 40px rgba(0,255,255,0.2);
-
-animation:fadeIn 1s ease;
-
+.glass{
+background:rgba(255,255,255,0.1);
+backdrop-filter:blur(12px);
 }
 
-@keyframes fadeIn{
-from{opacity:0;transform:translateY(30px)}
-to{opacity:1;transform:translateY(0)}
+.medal1{background:gold;color:black}
+.medal2{background:silver;color:black}
+.medal3{background:#cd7f32;color:white}
+
+.fade{
+animation:fade .5s
 }
 
-.title{
-
-text-align:center;
-font-size:30px;
-font-weight:700;
-margin-bottom:20px;
-
-background:linear-gradient(90deg,#00ffff,#00ff88);
--webkit-background-clip:text;
--webkit-text-fill-color:transparent;
-
-}
-
-.loginBox{
-
-display:flex;
-gap:10px;
-margin-bottom:20px;
-
-}
-
-input{
-
-flex:1;
-padding:12px;
-border:none;
-border-radius:10px;
-
-}
-
-button{
-
-padding:12px 20px;
-border:none;
-border-radius:10px;
-background:#00ffe7;
-color:#000;
-font-weight:600;
-cursor:pointer;
-transition:0.3s;
-
-}
-
-button:hover{
-
-transform:scale(1.1);
-box-shadow:0 0 20px #00fff7;
-
-}
-
-.wallet{
-
-margin-top:10px;
-font-size:18px;
-text-align:center;
-
-}
-
-.section{
-
-margin-top:30px;
-
-}
-
-.leaderboard{
-
-margin-top:15px;
-
-}
-
-.row{
-
-display:flex;
-justify-content:space-between;
-padding:12px;
-margin-bottom:10px;
-
-border-radius:12px;
-
-background:rgba(255,255,255,0.08);
-
-transition:0.3s;
-
-}
-
-.row:hover{
-
-transform:scale(1.03);
-background:rgba(255,255,255,0.15);
-
-}
-
-.rank{
-
-font-weight:700;
-
-}
-
-.coins{
-
-color:#00ffe7;
-
-font-weight:700;
-
-}
-
-.top1{
-
-background:linear-gradient(90deg,#ff00cc,#3333ff);
-box-shadow:0 0 20px #ff00ff;
-
-}
-
-.top2{
-
-background:linear-gradient(90deg,#00ffcc,#0066ff);
-
-}
-
-.top3{
-
-background:linear-gradient(90deg,#ffcc00,#ff6600);
-
-}
-
-.claimBox{
-
-display:flex;
-gap:10px;
-margin-top:10px;
-
-}
-
-.refBox{
-
-display:flex;
-gap:10px;
-margin-top:10px;
-
-}
-
-@media(max-width:700px){
-
-.title{font-size:24px}
-
-.row{font-size:14px}
-
+@keyframes fade{
+from{opacity:0;transform:translateY(20px)}
+to{opacity:1}
 }
 
 </style>
 
 </head>
 
-<body>
+<body class="min-h-screen flex items-center justify-center text-white">
 
-<div class="container">
+<div class="max-w-md w-full p-5 space-y-6">
 
-<div class="title">⚡ EASYGO REWARDS ⚡</div>
+<!-- LOGIN PAGE -->
 
-<div class="loginBox">
+<div id="login" class="glass p-6 rounded-2xl shadow-xl">
 
-<input id="mobile" placeholder="Enter Mobile Number">
+<div class="text-center mb-5">
 
-<button onclick="login()">Login</button>
+<img src="EasyGo-Logo.png" class="h-16 mx-auto">
 
-</div>
-
-<div class="wallet">
-
-Wallet Coins: <span id="coins">0</span>
+<h1 class="text-2xl font-bold mt-3">EasyGo VIP</h1>
 
 </div>
 
-<div class="section">
+<input id="mobile" placeholder="Enter Mobile Number"
+class="w-full p-3 rounded-xl text-black">
 
-<h3>Claim Code</h3>
+<button onclick="sendOTP()"
+class="mt-4 w-full bg-orange-500 p-3 rounded-xl">
 
-<div class="claimBox">
+Send OTP
 
-<input id="code" placeholder="Enter Code">
-
-<button onclick="claim()">Claim</button>
-
-</div>
+</button>
 
 </div>
 
-<div class="section">
 
-<h3>Refer Friend</h3>
+<!-- OTP POPUP -->
 
-<div class="refBox">
+<div id="otpPopup"
+class="hidden fixed inset-0 bg-black/60 flex items-center justify-center">
 
-<input id="friend" placeholder="Friend Mobile">
+<div class="glass p-6 rounded-xl w-72 text-center">
 
-<button onclick="refer()">Refer</button>
+<h2 class="text-lg font-bold">OTP Verification</h2>
 
-</div>
+<input id="otp"
+class="mt-4 w-full p-3 rounded-xl text-black">
 
-</div>
+<button onclick="verifyOTP()"
+class="mt-4 bg-green-500 w-full p-3 rounded-xl">
 
-<div class="section">
+Verify
 
-<h3>🏆 TOP FOODIES</h3>
-
-<div id="leaderboard" class="leaderboard"></div>
+</button>
 
 </div>
 
 </div>
+
+
+
+<!-- APP -->
+
+<div id="app" class="hidden space-y-6 fade">
+
+<!-- NAVBAR -->
+
+<div class="flex justify-between gap-2">
+
+<button onclick="showPage('claim')" class="bg-orange-500 p-2 rounded-xl flex-1">Claim Code</button>
+
+<button onclick="showPage('wallet')" class="bg-blue-500 p-2 rounded-xl flex-1">Wallet</button>
+
+<button onclick="showPage('leader')" class="bg-purple-500 p-2 rounded-xl flex-1">Leaderboard</button>
+
+</div>
+
+
+<!-- CLAIM -->
+
+<div id="claim" class="glass p-6 rounded-xl">
+
+<h2 class="font-bold mb-3">Enter Code</h2>
+
+<input id="code" class="w-full p-3 rounded-xl text-black">
+
+<button onclick="claim()" class="mt-3 w-full bg-orange-500 p-3 rounded-xl">
+
+Claim Reward
+
+</button>
+
+</div>
+
+
+<!-- WALLET -->
+
+<div id="wallet" class="hidden glass p-6 rounded-xl">
+
+<h2 class="text-xl font-bold text-center">Coins</h2>
+
+<div id="coins" class="text-4xl text-center mt-3">0</div>
+
+<!-- REFER -->
+
+<div class="mt-6">
+
+<h3 class="font-bold">Refer Friend</h3>
+
+<div class="flex gap-2 mt-2">
+
+<input id="friend" class="flex-1 p-2 rounded-xl text-black">
+
+<button onclick="refer()" class="bg-blue-500 px-3 rounded-xl">
+
+Add
+
+</button>
+
+</div>
+
+</div>
+
+<!-- MILESTONES -->
+
+<div class="mt-6">
+
+<h3 class="font-bold">Milestones</h3>
+
+<div class="space-y-2 mt-3">
+
+<button onclick="redeem(100)" class="w-full bg-green-500 p-2 rounded-xl">
+100 Coins → Cheese Ball
+</button>
+
+<button onclick="redeem(200)" class="w-full bg-green-500 p-2 rounded-xl">
+200 Coins → Cheese Corn Nugget
+</button>
+
+<button onclick="redeem(300)" class="w-full bg-green-500 p-2 rounded-xl">
+300 Coins → 2 Spring Rolls
+</button>
+
+<button onclick="redeem(500)" class="w-full bg-green-500 p-2 rounded-xl">
+500 Coins → Free Fries
+</button>
+
+<button onclick="redeem(800)" class="w-full bg-green-500 p-2 rounded-xl">
+800 Coins → Veg Steam Momos
+</button>
+
+</div>
+
+</div>
+
+</div>
+
+
+
+<!-- LEADERBOARD -->
+
+<div id="leader" class="hidden glass p-6 rounded-xl">
+
+<h2 class="font-bold mb-3">Top Foodies</h2>
+
+<div id="board" class="space-y-2"></div>
+
+</div>
+
+</div>
+
+</div>
+
+
+<!-- POPUP -->
+
+<div id="popup"
+class="hidden fixed bottom-6 left-1/2 -translate-x-1/2
+bg-black text-white px-5 py-3 rounded-xl">
+
+Message
+
+</div>
+
+
 
 <script>
 
 const API_URL="https://script.google.com/macros/s/AKfycbw718vXjWW1Wk123BeL3QX0mvDktu49YrTRdzNVExjwMM4gm8OPpYZi2gBoRRhuVvkF9g/exec"
 
-let currentMobile=""
+let mobile=null
 
-function login(){
+function popup(msg){
 
-const mobile=document.getElementById("mobile").value
+const p=document.getElementById("popup")
 
-currentMobile=mobile
+p.innerText=msg
+p.classList.remove("hidden")
 
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
-action:"login",
-mobile:mobile
-})
-})
-.then(r=>r.json())
-.then(d=>{
-
-document.getElementById("coins").innerText=d.coins
-
-loadLeaderboard()
-
-})
+setTimeout(()=>p.classList.add("hidden"),2500)
 
 }
 
-function claim(){
+function sendOTP(){
+
+document.getElementById("otpPopup").classList.remove("hidden")
+
+setTimeout(()=>{
+
+document.getElementById("otp").value="1234"
+
+},1200)
+
+}
+
+function verifyOTP(){
+
+mobile=document.getElementById("mobile").value
+
+localStorage.setItem("easygo",mobile)
+
+startApp()
+
+}
+
+function startApp(){
+
+document.getElementById("login").classList.add("hidden")
+document.getElementById("app").classList.remove("hidden")
+
+loadWallet()
+loadLeaderboard()
+
+}
+
+function showPage(p){
+
+["claim","wallet","leader"].forEach(id=>{
+
+document.getElementById(id).classList.add("hidden")
+
+})
+
+document.getElementById(p).classList.remove("hidden")
+
+}
+
+async function api(data){
+
+const r=await fetch(API_URL,{
+method:"POST",
+body:JSON.stringify(data)
+})
+
+return await r.json()
+
+}
+
+async function loadWallet(){
+
+const res=await api({
+action:"wallet",
+mobile:mobile
+})
+
+document.getElementById("coins").innerText=res.coins
+
+}
+
+async function claim(){
 
 const code=document.getElementById("code").value
 
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
+const res=await api({
 action:"claim",
-mobile:currentMobile,
+mobile:mobile,
 code:code
 })
-})
-.then(r=>r.json())
-.then(d=>{
 
-if(d.success){
+if(res.success){
 
-alert("Coins Added: "+d.coins)
+popup("Coins Added "+res.coins)
 
-login()
+loadWallet()
 
 }else{
 
-alert(d.error)
+popup(res.error)
 
 }
 
-})
-
 }
 
-function refer(){
+async function refer(){
 
 const friend=document.getElementById("friend").value
 
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
+const res=await api({
 action:"refer",
-mobile:currentMobile,
+mobile:mobile,
 friend:friend
 })
-})
-.then(r=>r.json())
-.then(d=>{
 
-alert(JSON.stringify(d))
-
-})
+if(res.success) popup("Referral Added")
+else popup(res.error)
 
 }
 
-function loadLeaderboard(){
+function redeem(cost){
 
-fetch(API_URL,{
-method:"POST",
-body:JSON.stringify({
+const coins=Number(document.getElementById("coins").innerText)
+
+if(coins<cost){
+popup("Not enough coins")
+return
+}
+
+popup("Reward Redeemed")
+
+document.getElementById("coins").innerText=coins-cost
+
+}
+
+async function loadLeaderboard(){
+
+const res=await api({
 action:"leaderboard"
 })
-})
-.then(r=>r.json())
-.then(data=>{
 
-const board=document.getElementById("leaderboard")
+const board=document.getElementById("board")
 
 board.innerHTML=""
 
-data.forEach((u,i)=>{
+res.forEach((u,i)=>{
 
-let cls="row"
+let medal=""
 
-if(i==0) cls+=" top1"
-if(i==1) cls+=" top2"
-if(i==2) cls+=" top3"
+if(i==0) medal="🥇"
+if(i==1) medal="🥈"
+if(i==2) medal="🥉"
 
 board.innerHTML+=`
 
-<div class="${cls}">
+<div class="flex justify-between p-2 bg-white/20 rounded-xl">
 
-<div class="rank">#${u.rank}</div>
+<span>${medal} XX${u[0].slice(-4)}</span>
 
-<div>${u.mobile}</div>
-
-<div class="coins">${u.coins} ⭐</div>
+<span>${u[1]} Coins</span>
 
 </div>
 
 `
-
-})
 
 })
 

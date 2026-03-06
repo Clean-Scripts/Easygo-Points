@@ -181,7 +181,7 @@
                 <div class="text-4xl text-yellow-400 font-bold mb-2" id="coins">0</div>
                 <div class="progress-bar"><div id="milestoneProgress" class="progress"></div></div>
                 <div id="milestones" class="text-sm mb-4"></div>
-                <button onclick="toggleReferral()" class="bg-blue-600 text-white w-full mb-4">Refer a Friend</button>
+                <button onclick="toggleReferral()" class="bg-blue-600 text-white w-full mb-4">Refer Friend [Get 40 🪙]</button>
                 <div id="refBox" class="hidden mt-3 space-y-2">
                     <input id="refMobile" placeholder="Friend Mobile" class="w-full p-3 text-black rounded-xl outline-none">
                     <button onclick="referFriend()" class="bg-green-600 text-white w-full">Send & Share</button>
@@ -190,7 +190,7 @@
                     <i class="fa-solid fa-clock-rotate-left text-red-500 mt-1 animate-pulse"></i>
                     <div class="text-left text-xs text-red-700">
                         <p class="font-bold">⚠️ Use it or Lose it!</p>
-                        <p>Aapke kamaye hue coins <strong>60 Days</strong> ke baad expire hone lagenge. Jo coins jis din mile hain, theek 60 din baad automatically zero ho jayenge. Aaj hi order karein!</p>
+                        <p>Aapke kamaye hue coins <strong>60 Days</strong> ke baad expire hone lagenge. Jo coins jis din mile hain, theek 60 din baad automatically zero ho jayenge. Aaj hi Order karein !</p>
                     </div>
                 </div>
             </div>
@@ -203,7 +203,7 @@
     </div>
 
     <script>
-        const API = "https://script.google.com/macros/s/AKfycbwDSTqsi34lBvKgyymBjF2eKiptyfshDsKPelDQzArbdoShqTEffk2zBcf9zchQ-Uc/exec";
+        const API = "https://script.google.com/macros/s/AKfycbykyEFd48wHvhndT1m4kiw_5dPtcEQzYuSH318XxZ-1w_T5y9gquvyGKhUjFdpJ08nD/exec";
         let mobile = null, generatedOTP = null;
 
         function popup(msg) {
@@ -260,16 +260,16 @@
         }
 
         const milestonesArr = [
-    { coins: 50, text: "2 Pcs Crispy Mini Samosas (Free with any order)" },
-    { coins: 100, text: "2 Pcs Crunchy Cheese Balls" },
-    { coins: 150, text: "Half Portion French Fries 🍟" },
-    { coins: 200, text: "3 Pcs Cheese Corn Nuggets" },
-    { coins: 250, text: "Half Plate Veg Momos 🥟" },
-    { coins: 300, text: "Full Plate French Fries" },
-    { coins: 350, text: "Half Plate Premium Paneer Momos" },
+    { coins: 90, text: "[2 Pcs] Crispy Mini Samosas" },
+    { coins: 100, text: "[2 Pcs] Crunchy Cheese Balls" },
+    { coins: 150, text: "[70 G] French Fries 🍟" },
+    { coins: 200, text: "[2 Pcs] Cheese Corn Nuggets" },
+    { coins: 250, text: "[5 Pcs] Veg Momos 🥟" },
+    { coins: 300, text: "[4 Pcs] Spring Roll" },
+    { coins: 350, text: "[5 Pcs] Premium Paneer Momos" },
     { coins: 400, text: "Full Plate Veg Momos" },
     { coins: 450, text: "Full Plate Cheese Corn Nuggets" },
-    { coins: 500, text: "VIP Feast: Full Plate Cheese Corn Momos + Fries! 👑" }
+    { coins: 500, text: "VIP 👑: [7 Pcs] Cheese Corn Momos + Fries🍟" }
         ];
 
         async function loadWallet() {

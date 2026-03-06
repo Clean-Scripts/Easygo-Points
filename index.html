@@ -334,15 +334,18 @@
             if (friend.length != 10) { popup("Invalid number"); return; }
             let res = await api({ action: "refer", mobile, friend });
             if (res.success) {
-                let msg = encodeURIComponent(`🛑 *RUK JAO FOODIE! Ye message Miss kiya toh Bahut Pachtaoge!* 🛑
+                let msg = encodeURIComponent(`
+                🛑 *RUK JAO FOODIE! Ye message Miss kiya toh Bahut Pachtaoge!* 🛑
+-------------------------------------------------------------
                 Indore ke sabse juicy Cheese Corn Momos or Garma-Garam Mini Samosas bilkul 
                 FREE!! FREE!! FREE!! bat rahe hain! 😍🥟
                 Maine EasyGo ka *VIP Club* join kiya hai. Akele akele khane mein mazaa nahi, tu bhi aaja! 
                 Mere Link se Join karega toh direct VIP Entry or Bonus Coins Milenge! 🪙✨
-
+-------------------------------------------------------------
                     👑 Apni Foodie Loot Yahan Claim Kar:
                     👉 https://clean-scripts.github.io/Easygo-Points/
-                    _(Baad mein mat bolna maine akele kha liya!)_ 🏃‍♂️💨`);
+                    _(Baad mein mat bolna maine akele kha liya!)_ 🏃‍♂️💨
+                `);
                 window.location.href = `https://api.whatsapp.com/send?text=${msg}`;
             } else { popup(res.error); }
         }

@@ -1,551 +1,395 @@
 <!DOCTYPE html>
 <html lang="en">
-
 <head>
 
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>EasyGo VIP</title>
+<title>EasyGo Rewards</title>
 
-<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;500;700&display=swap" rel="stylesheet">
 
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<style>
 
-<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+*{
+margin:0;
+padding:0;
+box-sizing:border-box;
+font-family:Poppins;
+}
 
-<link rel="icon" href="EasyGo-Logo.png">
+body{
+
+background:linear-gradient(135deg,#020024,#090979,#00d4ff);
+min-height:100vh;
+display:flex;
+justify-content:center;
+align-items:center;
+color:white;
+
+}
+
+.container{
+
+width:95%;
+max-width:1100px;
+
+background:rgba(255,255,255,0.05);
+
+backdrop-filter:blur(20px);
+
+border-radius:20px;
+
+padding:25px;
+
+box-shadow:0 0 40px rgba(0,255,255,0.2);
+
+animation:fadeIn 1s ease;
+
+}
+
+@keyframes fadeIn{
+from{opacity:0;transform:translateY(30px)}
+to{opacity:1;transform:translateY(0)}
+}
+
+.title{
+
+text-align:center;
+font-size:30px;
+font-weight:700;
+margin-bottom:20px;
+
+background:linear-gradient(90deg,#00ffff,#00ff88);
+-webkit-background-clip:text;
+-webkit-text-fill-color:transparent;
+
+}
+
+.loginBox{
+
+display:flex;
+gap:10px;
+margin-bottom:20px;
+
+}
+
+input{
+
+flex:1;
+padding:12px;
+border:none;
+border-radius:10px;
+
+}
+
+button{
+
+padding:12px 20px;
+border:none;
+border-radius:10px;
+background:#00ffe7;
+color:#000;
+font-weight:600;
+cursor:pointer;
+transition:0.3s;
+
+}
+
+button:hover{
+
+transform:scale(1.1);
+box-shadow:0 0 20px #00fff7;
+
+}
+
+.wallet{
+
+margin-top:10px;
+font-size:18px;
+text-align:center;
+
+}
+
+.section{
+
+margin-top:30px;
+
+}
+
+.leaderboard{
+
+margin-top:15px;
+
+}
+
+.row{
+
+display:flex;
+justify-content:space-between;
+padding:12px;
+margin-bottom:10px;
+
+border-radius:12px;
+
+background:rgba(255,255,255,0.08);
+
+transition:0.3s;
+
+}
+
+.row:hover{
+
+transform:scale(1.03);
+background:rgba(255,255,255,0.15);
+
+}
+
+.rank{
+
+font-weight:700;
+
+}
+
+.coins{
+
+color:#00ffe7;
+
+font-weight:700;
+
+}
+
+.top1{
+
+background:linear-gradient(90deg,#ff00cc,#3333ff);
+box-shadow:0 0 20px #ff00ff;
+
+}
+
+.top2{
+
+background:linear-gradient(90deg,#00ffcc,#0066ff);
+
+}
+
+.top3{
+
+background:linear-gradient(90deg,#ffcc00,#ff6600);
+
+}
+
+.claimBox{
+
+display:flex;
+gap:10px;
+margin-top:10px;
+
+}
+
+.refBox{
+
+display:flex;
+gap:10px;
+margin-top:10px;
+
+}
+
+@media(max-width:700px){
+
+.title{font-size:24px}
+
+.row{font-size:14px}
+
+}
+
+</style>
 
 </head>
 
+<body>
 
-<body class="bg-orange-50 min-h-screen flex items-center justify-center">
+<div class="container">
 
+<div class="title">⚡ EASYGO REWARDS ⚡</div>
 
-<!-- LOADER -->
+<div class="loginBox">
 
-<div id="loader" class="fixed inset-0 bg-black flex items-center justify-center z-50">
+<input id="mobile" placeholder="Enter Mobile Number">
 
-<div class="text-center text-white">
+<button onclick="login()">Login</button>
 
-<img src="EasyGo-Logo.png" class="h-24 mx-auto animate-bounce">
+</div>
 
-<p class="mt-5 text-lg animate-pulse">
+<div class="wallet">
 
-Checking your VIP rewards...
+Wallet Coins: <span id="coins">0</span>
 
-</p>
+</div>
+
+<div class="section">
+
+<h3>Claim Code</h3>
+
+<div class="claimBox">
+
+<input id="code" placeholder="Enter Code">
+
+<button onclick="claim()">Claim</button>
 
 </div>
 
 </div>
 
+<div class="section">
 
+<h3>Refer Friend</h3>
 
-<div class="max-w-md w-full p-5 space-y-6">
+<div class="refBox">
 
-<!-- LOGIN -->
+<input id="friend" placeholder="Friend Mobile">
 
-<div id="login" class="bg-white p-6 rounded-2xl shadow-xl">
-
-<div class="text-center mb-6">
-
-<img src="EasyGo-Logo.png" class="h-16 mx-auto">
-
-<h1 class="text-2xl font-bold mt-3">
-
-EasyGo VIP
-
-</h1>
-
-</div>
-
-<input id="mobile" placeholder="Enter Mobile Number"
-
-class="w-full border p-3 rounded-xl">
-
-<button onclick="login()"
-
-class="mt-4 w-full bg-orange-500 text-white p-3 rounded-xl font-bold">
-
-Login
-
-</button>
-
-</div>
-
-
-
-<!-- APP -->
-
-<div id="app" class="hidden space-y-6">
-
-<!-- WALLET -->
-
-<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
-
-<h2 class="text-xl font-bold">Wallet</h2>
-
-<div id="coins"
-
-class="text-5xl text-orange-500 mt-3 font-bold">
-
-0
-
-</div>
-
-<p class="text-gray-500">Coins</p>
-
-<div id="tier" class="mt-2 font-bold"></div>
-
-</div>
-
-
-
-<!-- DAILY STREAK -->
-
-<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
-
-<h2 class="font-bold mb-3">
-
-🔥 Daily Streak
-
-</h2>
-
-<p id="streakText">
-
-Login daily to earn coins
-
-</p>
-
-</div>
-
-
-
-<!-- SPIN WHEEL -->
-
-<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
-
-<h2 class="font-bold mb-3">
-
-🎰 Daily Spin
-
-</h2>
-
-<button onclick="spin()"
-
-class="bg-purple-600 text-white px-6 py-3 rounded-xl font-bold">
-
-Spin Now
-
-</button>
-
-</div>
-
-
-
-<!-- MYSTERY BOX -->
-
-<div class="bg-white p-6 rounded-2xl shadow-xl text-center">
-
-<h2 class="font-bold mb-3">
-
-🎁 Mystery Box
-
-</h2>
-
-<button onclick="mystery()"
-
-class="bg-green-600 text-white px-6 py-3 rounded-xl font-bold">
-
-Open Box
-
-</button>
-
-</div>
-
-
-
-<!-- REFERRAL -->
-
-<div class="bg-white p-6 rounded-2xl shadow-xl">
-
-<h2 class="font-bold mb-3">
-
-Refer a Friend
-
-</h2>
-
-<div class="flex gap-2">
-
-<input id="refMobile"
-
-class="flex-1 border p-3 rounded-xl"
-
-placeholder="Friend Mobile">
-
-<button onclick="refer()"
-
-class="bg-blue-500 text-white px-5 rounded-xl font-bold">
-
-Add
-
-</button>
+<button onclick="refer()">Refer</button>
 
 </div>
 
 </div>
 
+<div class="section">
 
+<h3>🏆 TOP FOODIES</h3>
 
-<!-- CLAIM -->
-
-<div class="bg-white p-6 rounded-2xl shadow-xl">
-
-<h2 class="font-bold mb-3">
-
-Enter Secret Code
-
-</h2>
-
-<div class="flex gap-2">
-
-<input id="code"
-
-class="flex-1 border p-3 rounded-xl"
-
-placeholder="Enter Code">
-
-<button onclick="claim()"
-
-class="bg-orange-500 text-white px-5 rounded-xl font-bold">
-
-Claim
-
-</button>
+<div id="leaderboard" class="leaderboard"></div>
 
 </div>
 
 </div>
-
-
-
-<!-- LEADERBOARD -->
-
-<div class="bg-white p-6 rounded-2xl shadow-xl">
-
-<h2 class="font-bold mb-4">
-
-🏆 Top Foodies
-
-</h2>
-
-<div id="leaderboard"
-
-class="space-y-2"></div>
-
-</div>
-
-
-
-<!-- ORDER -->
-
-<a href="https://clean-scripts.github.io/Easygo-Menu/"
-
-class="block text-center bg-red-600 text-white p-4 rounded-xl font-bold">
-
-Order Now
-
-</a>
-
-</div>
-
-</div>
-
-
 
 <script>
 
 const API_URL="https://script.google.com/macros/s/AKfycbw718vXjWW1Wk123BeL3QX0mvDktu49YrTRdzNVExjwMM4gm8OPpYZi2gBoRRhuVvkF9g/exec"
 
-let mobile=null
-
-
-
-async function api(data){
-
-const res=await fetch(API_URL,{
-method:"POST",
-body:JSON.stringify(data)
-})
-
-return await res.json()
-
-}
-
-
-
-window.onload=()=>{
-
-const saved=localStorage.getItem("easygo_user")
-
-if(saved){
-
-mobile=saved
-startApp()
-
-}else{
-
-loader.style.display="none"
-
-}
-
-}
-
-
+let currentMobile=""
 
 function login(){
 
-mobile=document.getElementById("mobile").value
+const mobile=document.getElementById("mobile").value
 
-if(mobile.length!=10){
+currentMobile=mobile
 
-Swal.fire("Invalid number")
-
-return
-
-}
-
-localStorage.setItem("easygo_user",mobile)
-
-startApp()
-
-}
-
-
-
-function startApp(){
-
-document.getElementById("login").classList.add("hidden")
-
-Promise.all([
-
-loadWallet(),
-loadLeaderboard()
-
-]).then(()=>{
-
-loader.style.display="none"
-
-document.getElementById("app").classList.remove("hidden")
-
-})
-
-}
-
-
-
-async function loadWallet(){
-
-const res=await api({
-action:"wallet",
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"login",
 mobile:mobile
 })
+})
+.then(r=>r.json())
+.then(d=>{
 
-animateCoins(res.coins)
+document.getElementById("coins").innerText=d.coins
 
-updateTier(res.coins)
+loadLeaderboard()
 
-}
-
-
-
-function updateTier(c){
-
-let tier="Bronze"
-
-if(c>300) tier="Silver"
-
-if(c>1000) tier="Gold"
-
-document.getElementById("tier").innerText="👑 "+tier
+})
 
 }
 
+function claim(){
 
+const code=document.getElementById("code").value
 
-async function loadLeaderboard(){
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"claim",
+mobile:currentMobile,
+code:code
+})
+})
+.then(r=>r.json())
+.then(d=>{
 
-const res=await api({
+if(d.success){
+
+alert("Coins Added: "+d.coins)
+
+login()
+
+}else{
+
+alert(d.error)
+
+}
+
+})
+
+}
+
+function refer(){
+
+const friend=document.getElementById("friend").value
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
+action:"refer",
+mobile:currentMobile,
+friend:friend
+})
+})
+.then(r=>r.json())
+.then(d=>{
+
+alert(JSON.stringify(d))
+
+})
+
+}
+
+function loadLeaderboard(){
+
+fetch(API_URL,{
+method:"POST",
+body:JSON.stringify({
 action:"leaderboard"
 })
+})
+.then(r=>r.json())
+.then(data=>{
 
 const board=document.getElementById("leaderboard")
 
 board.innerHTML=""
 
-res.forEach((u,i)=>{
+data.forEach((u,i)=>{
 
-let medal=""
+let cls="row"
 
-if(i==0) medal="🥇"
-if(i==1) medal="🥈"
-if(i==2) medal="🥉"
+if(i==0) cls+=" top1"
+if(i==1) cls+=" top2"
+if(i==2) cls+=" top3"
 
-let name="User"
+board.innerHTML+=`
 
-if(!isNaN(u[0])){
-name="XX"+String(u[0]).slice(-4)
-}else{
-name=u[0]
-}
+<div class="${cls}">
 
-const div=document.createElement("div")
+<div class="rank">#${u.rank}</div>
 
-div.className="flex justify-between bg-orange-50 p-3 rounded-xl"
+<div>${u.mobile}</div>
 
-div.innerHTML=`
-<span>${medal} ${name}</span>
-<span>${u[1]} coins</span>
+<div class="coins">${u.coins} ⭐</div>
+
+</div>
+
 `
 
-board.appendChild(div)
-
 })
 
-}
-
-
-async function claim(){
-
-const code=document.getElementById("code").value
-
-Swal.fire({
-
-title:"Checking code...",
-
-didOpen:()=>{
-
-Swal.showLoading()
-
-}
-
 })
-
-const res=await api({
-action:"claim",
-mobile:mobile,
-code:code
-})
-
-if(res.error){
-
-Swal.fire("Error",res.error,"error")
-
-return
-
-}
-
-confetti({particleCount:150,spread:70})
-
-Swal.fire("Success","You earned "+res.coins+" coins!","success")
-
-loadWallet()
-
-}
-
-
-
-async function refer(){
-
-const friend=document.getElementById("refMobile").value
-
-const res=await api({
-
-action:"refer",
-
-mobile:mobile,
-
-friend:friend
-
-})
-
-if(res.success){
-
-Swal.fire("Pending","Waiting for friend to join")
-
-}else{
-
-Swal.fire(res.error)
-
-}
-
-}
-
-
-
-function spin(){
-
-const rewards=[5,10,15,20]
-
-const win=rewards[Math.floor(Math.random()*rewards.length)]
-
-confetti()
-
-Swal.fire(
-
-"🎰 You won "+win+" coins!"
-
-)
-
-}
-
-
-
-function mystery(){
-
-const rewards=[10,25,50]
-
-const win=rewards[Math.floor(Math.random()*rewards.length)]
-
-confetti()
-
-Swal.fire(
-
-"🎁 Mystery reward: "+win+" coins!"
-
-)
-
-}
-
-
-
-function animateCoins(target){
-
-const el=document.getElementById("coins")
-
-let current=0
-
-const interval=setInterval(()=>{
-
-current+=3
-
-if(current>=target){
-
-current=target
-
-clearInterval(interval)
-
-}
-
-el.innerText=current
-
-},20)
 
 }
 
 </script>
 
 </body>
-
 </html>

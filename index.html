@@ -29,6 +29,22 @@ body{
 }
 @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
 
+
+#claimSectionCoins {
+  text-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
+  font-family: 'Courier New', Courier, monospace; /* Digital look */
+}
+
+.bg-yellow-500\/20 {
+  animation: pulseGlow 2s infinite;
+}
+
+@keyframes pulseGlow {
+  0% { box-shadow: 0 0 5px rgba(250, 204, 21, 0.2); }
+  50% { box-shadow: 0 0 15px rgba(250, 204, 21, 0.4); }
+  100% { box-shadow: 0 0 5px rgba(250, 204, 21, 0.2); }
+}
+
 /* ------------------ POPUP ------------------ */
 .popup{
   position:fixed;
@@ -61,6 +77,22 @@ button {
   text-transform: uppercase;
   letter-spacing: 0.5px;
   font-size: 14px;
+}
+
+/* Live Badge Animation */
+.bg-yellow-500\/20 {
+  animation: livePulse 2s infinite ease-in-out;
+}
+
+@keyframes livePulse {
+  0% { opacity: 0.8; box-shadow: 0 0 0px rgba(250, 204, 21, 0); }
+  50% { opacity: 1; box-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
+  100% { opacity: 0.8; box-shadow: 0 0 0px rgba(250, 204, 21, 0); }
+}
+
+/* Input shadow effect */
+#code {
+  box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
 }
 
 button:hover {
@@ -134,9 +166,29 @@ h1,h2,h3{
 
 <!-- CLAIM -->
 <div id="claim" class="card">
-<h2 class="text-lg mb-3">Enter Secret Code</h2>
-<input id="code" class="w-full p-3 text-black rounded mb-3">
-<button onclick="claimCode()" class="w-full bg-orange-500 p-3 rounded">Claim Reward</button>
+  <div class="flex justify-between items-center mb-5 pb-2 border-b border-white/10">
+    <h2 class="text-xl font-bold">Claim Reward</h2>
+    <div class="bg-yellow-500/20 px-3 py-1 rounded-full border border-yellow-500/50 flex items-center gap-2">
+      <span class="text-[10px] font-black uppercase tracking-wider text-yellow-500">Live</span>
+      <span id="claimSectionCoins" class="text-yellow-400 font-bold text-base">0</span>
+    </div>
+  </div>
+  
+  <div class="space-y-4">
+    <div>
+      <label class="text-xs text-gray-400 ml-1 mb-1 block">Enter Secret Code</label>
+      <input id="code" placeholder="Enter code here..." 
+             class="w-full p-4 text-black rounded-2xl bg-white/90 focus:bg-white transition-all outline-none border-2 border-transparent focus:border-orange-500 shadow-inner">
+    </div>
+    
+    <button onclick="claimCode()" 
+            class="w-full bg-orange-500 hover:bg-orange-600 p-4 rounded-2xl shadow-lg shadow-orange-500/30 text-white font-bold flex justify-center items-center gap-2">
+      <span>Claim Reward</span>
+      <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
+      </svg>
+    </button>
+  </div>
 </div>
 
 <!-- WALLET -->
@@ -241,21 +293,35 @@ async function loadWallet() {
 }
 
 function animateCoins(target) {
-    let el = document.getElementById("coins"), c = 0;
-    let current = parseInt(el.innerText) || 0;
+    const walletEl = document.getElementById("coins");
+    const claimEl = document.getElementById("claimSectionCoins");
+    
+    let current = parseInt(walletEl.innerText) || 0;
     if(current === target) return;
     
-    let step = target > current ? 5 : -5;
-    let i = setInterval(() => {
-        current += step;
-        if ((step > 0 && current >= target) || (step < 0 && current <= target)) {
-            current = target;
-            clearInterval(i);
+    // Animation speed setup
+    const duration = 1000; // 1 second
+    const frameRate = 30;
+    const totalFrames = (duration / 1000) * frameRate;
+    const increment = (target - current) / totalFrames;
+    
+    let frame = 0;
+    const interval = setInterval(() => {
+        frame++;
+        current += increment;
+        
+        const displayValue = Math.round(current);
+        
+        if (walletEl) walletEl.innerText = displayValue;
+        if (claimEl) claimEl.innerText = displayValue;
+        
+        if (frame >= totalFrames) {
+            if (walletEl) walletEl.innerText = target;
+            if (claimEl) claimEl.innerText = target;
+            clearInterval(interval);
         }
-        el.innerText = current;
-    }, 10);
+    }, 1000 / frameRate);
 }
-
 function updateMilestones(coins) {
     const bar = document.getElementById("milestoneProgress");
     let nextM = milestonesArr.find(m => m.coins > coins) || milestonesArr[milestonesArr.length - 1];

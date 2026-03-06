@@ -26,9 +26,8 @@ body{margin:0;font-family:system-ui;color:white;height:100vh;background:url('bac
 <body>
 
 <div id="popup" class="popup"></div>
-<div class="app">
 
-<!-- LOGO -->
+<div class="app">
 <div class="text-center mb-6">
 <img src="EasyGo-Logo.png" class="h-16 mx-auto">
 <h1 class="text-2xl font-bold mt-2">EasyGo VIP Rewards</h1>
@@ -50,8 +49,6 @@ body{margin:0;font-family:system-ui;color:white;height:100vh;background:url('bac
 
 <!-- APP -->
 <div id="app" class="hidden">
-
-<!-- NAV -->
 <nav class="flex gap-2 mb-4">
 <button class="bg-orange-500" onclick="showTab('claim')">Claim Code</button>
 <button class="bg-yellow-500" onclick="showTab('wallet')">Wallet</button>
@@ -84,17 +81,30 @@ body{margin:0;font-family:system-ui;color:white;height:100vh;background:url('bac
 <h2 class="text-lg mb-3">Top Foodies</h2>
 <div id="board"></div>
 </div>
-
 </div>
+
 <script>
-const API="https://script.google.com/macros/s/AKfycbydIgB29s_DRJeJGlOULE2qhckJsic6d36gV4OZ4yqa2yTtPMOIgALNxwaF2Hkr6rUv/exec";
+const API="https://script.google.com/macros/s/AKfycby8809DKT91EJ_DxYHv1fkUs90yqQ_rV4AZxWKfi2lVBwGFwvzxyIJn62fBLEq55dfs/exec";
 let mobile=null, generatedOTP=null;
 
 function popup(msg){ const p=document.getElementById("popup"); p.innerText=msg; p.classList.add("show"); setTimeout(()=>p.classList.remove("show"),3000); }
 
 function sendOTP(){ mobile=document.getElementById("mobile").value; if(mobile.length!=10){popup("Enter valid mobile");return;} generatedOTP=Math.floor(1000+Math.random()*9000); popup("OTP Sent: "+generatedOTP); document.getElementById("login").classList.add("hidden"); document.getElementById("otpBox").classList.remove("hidden"); }
-function verifyOTP(){ if(document.getElementById("otp").value==generatedOTP){ localStorage.setItem("easygo_user",mobile); startApp() } else popup("Invalid OTP") }
-window.onload=()=>{ let saved=localStorage.getItem("easygo_user"); if(saved){mobile=saved; startApp()} }
+
+async function verifyOTP(){
+  if(document.getElementById("otp").value==generatedOTP){
+    let res=await api({action:"login", mobile})
+    if(res.success){
+      localStorage.setItem("easygo_user", mobile)
+      startApp()
+    } else popup("Login failed")
+  } else popup("Invalid OTP")
+}
+
+window.onload=()=>{
+  let saved=localStorage.getItem("easygo_user")
+  if(saved){ mobile=saved; startApp() }
+}
 
 function startApp(){ document.getElementById("login").style.display="none"; document.getElementById("otpBox").style.display="none"; document.getElementById("app").classList.remove("hidden"); loadWallet(); loadLeaderboard(); }
 
@@ -102,29 +112,17 @@ function showTab(id){ ["claim","wallet","leaderboard"].forEach(t=>document.getEl
 
 async function api(data){ let res=await fetch(API,{method:"POST",body:JSON.stringify(data)}); return await res.json(); }
 
-const milestonesArr=[
-  {coins:100,text:"Free Cheese Ball"},
-  {coins:200,text:"Cheese Corn Nuggets"},
-  {coins:400,text:"2 Spring Rolls"},
-  {coins:700,text:"Free Fries"},
-  {coins:1000,text:"Veg Steam Momos"}
-]
+const milestonesArr=[ {coins:100,text:"Free Cheese Ball"}, {coins:200,text:"Cheese Corn Nuggets"}, {coins:400,text:"2 Spring Rolls"}, {coins:700,text:"Free Fries"}, {coins:1000,text:"Veg Steam Momos"} ]
 
 async function loadWallet(){
   let res=await api({action:"wallet",mobile})
   animateCoins(res.coins)
-  
-  // Coin expiry alert
   if(res.expired>0) popup(res.expired+" coins expired")
-  if(res.expiringSoon>0) popup(res.expiringSoon+" coins expiring in few days!")
-
+  if(res.expiringSoon>0) popup(res.expiringSoon+" coins expiring soon!")
   updateMilestones(res.coins)
 }
 
-function animateCoins(target){
-  let el=document.getElementById("coins"); let c=0
-  let i=setInterval(()=>{ c+=5; if(c>=target){ c=target; clearInterval(i) }; el.innerText=c },15)
-}
+function animateCoins(target){ let el=document.getElementById("coins"); let c=0; let i=setInterval(()=>{ c+=5; if(c>=target){ c=target; clearInterval(i) }; el.innerText=c },15) }
 
 function updateMilestones(coins){
   const bar=document.getElementById("milestoneProgress")
@@ -134,18 +132,14 @@ function updateMilestones(coins){
 
   const mDiv=document.getElementById("milestones")
   mDiv.innerHTML=""
-  milestonesArr.forEach(m=>{
-    mDiv.innerHTML+=`<div class="milestone-badge ${coins>=m.coins?'reached':''}">${m.coins} → ${m.text}</div>`
-  })
+  milestonesArr.forEach(m=>{ mDiv.innerHTML+=`<div class="milestone-badge ${coins>=m.coins?'reached':''}">${m.coins} → ${m.text}</div>` })
 }
 
-/* CLAIM CODE WITH COIN FLY ANIMATION */
+/* CLAIM CODE */
 async function claimCode(){
   let code=document.getElementById("code").value
   let res=await api({action:"claim",mobile,code})
   if(res.error){popup(res.error); return}
-  
-  // Coin flying animation
   const start=document.getElementById("claim").getBoundingClientRect()
   const end=document.getElementById("coins").getBoundingClientRect()
   for(let i=0;i<res.coins;i+=10){
@@ -155,7 +149,6 @@ async function claimCode(){
     c.animate([{transform:`translate(0px,0px)`},{transform:`translate(${dx}px,${dy}px)`}],{duration:600,fill:"forwards"})
     setTimeout(()=>c.remove(),700)
   }
-
   confetti({particleCount:100,spread:70,origin:{y:0.6}})
   popup("Reward Claimed: "+res.coins+" coins")
   loadWallet(); loadLeaderboard()
@@ -167,17 +160,7 @@ async function referFriend(){
   let friend=document.getElementById("refMobile").value
   if(friend.length!=10){popup("Enter valid mobile");return}
   let res=await api({action:"refer",mobile,friend})
-  if(res.success){
-    popup(res.message); loadWallet()
-    // Referral reward animation
-    const walletRect=document.getElementById("coins").getBoundingClientRect()
-    for(let i=0;i<30;i++){
-      let c=document.createElement("div"); c.className="coin-fly"; document.body.appendChild(c)
-      c.style.left=walletRect.left+walletRect.width/2+"px"; c.style.top=walletRect.top+"px"
-      c.animate([{transform:"translate(0px,0px)"},{transform:`translate(${Math.random()*20-10}px, -50px)`}],{duration:800,fill:"forwards"})
-      setTimeout(()=>c.remove(),900)
-    }
-  } else popup(res.error)
+  if(res.success){ popup(res.message); loadWallet() } else popup(res.error)
 }
 
 /* LEADERBOARD */
@@ -190,5 +173,6 @@ async function loadLeaderboard(){
   })
 }
 </script>
+
 </body>
 </html>

@@ -117,6 +117,7 @@
     const API="https://script.google.com/macros/s/AKfycbysfriqRDdJqYRAHKnRZeL8yA4gdz49WzVG3PqKFRyy2lTxGS8a4BTS1CZDYhwhggux/exec";
     let mobile, generatedOTP;
 
+    // --- UI Helpers ---
     function popup(msg) {
         const p = document.getElementById("popup");
         p.innerText = msg;
@@ -130,107 +131,90 @@
     }
 
     async function api(data) {
-        let res = await fetch(API, { method: "POST", body: JSON.stringify(data) });
-        return await res.json();
+        try {
+            let res = await fetch(API, { method: "POST", body: JSON.stringify(data) });
+            return await res.json();
+        } catch(e) {
+            popup("Connection Error! ❌");
+            return { success: false };
+        }
     }
 
-async function sendOTP() {
-    mobile = document.getElementById("mobile").value;
-    if(mobile.length !== 10) return popup("Enter 10 digit mobile!");
+    // --- Authentication Flow ---
+    async function sendOTP() {
+        mobile = document.getElementById("mobile").value;
+        if(mobile.length !== 10) return popup("Enter 10 digit mobile!");
 
-    // Button loading state & UI protection
-    const btn = document.querySelector("#login button");
-    const originalText = btn.innerText;
-    btn.innerText = "Processing...";
-    btn.disabled = true;
-    btn.style.opacity = "0.7";
+        const btn = document.querySelector("#login button");
+        const originalText = btn.innerText;
+        btn.innerText = "Processing...";
+        btn.disabled = true;
+        btn.style.opacity = "0.7";
 
-    try {
-        // Backend se OTP mangwana
-        let res = await api({ action: "sendOTP", mobile });
-        
-        if(res && res.success) {
-            generatedOTP = res.otp;
-            popup("OTP Sent: " + generatedOTP);
+        try {
+            let res = await api({ action: "sendOTP", mobile });
+            if(res && res.success) {
+                generatedOTP = res.otp;
+                popup("OTP Sent: " + generatedOTP);
 
-            // 1. Pehle OTP input ko bilkul khali karo (Purana glitch hatane ke liye)
-            document.getElementById("otp").value = "";
-            document.getElementById("otpLoader").style.width = "0%";
+                document.getElementById("otp").value = "";
+                document.getElementById("otpLoader").style.width = "0%";
+                document.getElementById("login").classList.add("hidden");
+                document.getElementById("otpBox").classList.remove("hidden");
 
-            // 2. UI Change: Login chhupao, OTP dikhao
-            document.getElementById("login").classList.add("hidden");
-            document.getElementById("otpBox").classList.remove("hidden");
-
-            // 3. AUTO-FILL & AUTO-LOGIN LOGIC
-            setTimeout(() => {
-                // Loader bar start
-                const loader = document.getElementById("otpLoader");
-                if(loader) loader.style.width = "100%";
-                
                 setTimeout(() => {
-                    document.getElementById("otp").value = generatedOTP;
-                    verifyOTP(); // Auto-verify call
-                }, 1200); // 1.2s delay for smooth fill
-            }, 400);
+                    const loader = document.getElementById("otpLoader");
+                    if(loader) loader.style.width = "100%";
+                    setTimeout(() => {
+                        document.getElementById("otp").value = generatedOTP;
+                        verifyOTP();
+                    }, 1200);
+                }, 400);
+            }
+        } catch (err) {
+            popup("Error! ❌");
+            btn.innerText = originalText;
+            btn.disabled = false;
+            btn.style.opacity = "1";
+        }
+    }
 
+    async function verifyOTP() {
+        if(document.getElementById("otp").value == generatedOTP) {
+            let res = await api({ action: "login", mobile });
+            if(res && res.success) {
+                localStorage.setItem("easygo_user", mobile);
+                renderOffers(res.offers);
+                startApp();
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+            }
         } else {
-            throw new Error("Failed to get response");
+            popup("Wrong OTP!");
         }
-    } catch (err) {
-        popup("Error sending OTP ❌");
-        btn.innerText = originalText;
-        btn.disabled = false;
-        btn.style.opacity = "1";
-    }
-}
-
-async function verifyOTP() {
-    if(document.getElementById("otp").value == generatedOTP) {
-        let res = await api({ action: "login", mobile });
-        
-        if(res.success) {
-            localStorage.setItem("easygo_user", mobile);
-            
-            // Ab loop likhne ki zaroorat nahi, sirf function call karo
-            renderOffers(res.offers);
-
-            startApp();
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        }
-    } else {
-        popup("Wrong OTP!");
     }
 
-            startApp();
-            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        }
-    } else {
-        popup("Wrong OTP!");
-    }
-}
-
+    // --- Core Functions ---
     function renderOffers(offers) {
-    if (offers && offers.length > 0) {
-        const container = document.getElementById("offerContainer");
-        container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase italic">Special Offers For You</h3>`;
-
-        offers.forEach((offer, index) => {
-            container.innerHTML += `
-                <div class="relative py-4">
-                    <h2 class="text-xl font-black text-orange-600 italic leading-tight">${offer.title}</h2>
-                    <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
-                    <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
-                        VALUE: ${offer.value} 🪙
-                    </div>
-                    ${index !== offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
-                </div>
-            `;
-        });
-        document.getElementById("welcomeBanner").classList.remove("hidden");
+        if (offers && offers.length > 0) {
+            const container = document.getElementById("offerContainer");
+            container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase italic">Special Offers For You</h3>`;
+            offers.forEach((offer, index) => {
+                container.innerHTML += `
+                    <div class="relative py-4 text-left">
+                        <h2 class="text-xl font-black text-orange-600 italic leading-tight uppercase">${offer.title}</h2>
+                        <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
+                        <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
+                            VALUE: ${offer.value} 🪙
+                        </div>
+                        ${index !== offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
+                    </div>`;
+            });
+            document.getElementById("welcomeBanner").classList.remove("hidden");
+        }
     }
-}
 
     function startApp() {
+        document.getElementById("login").classList.add("hidden");
         document.getElementById("otpBox").classList.add("hidden");
         document.getElementById("app").classList.remove("hidden");
         loadWallet();
@@ -239,93 +223,77 @@ async function verifyOTP() {
 
     async function loadWallet() {
         let res = await api({ action: "wallet", mobile });
-        document.getElementById("coins").innerText = res.coins;
-    }
-
-async function redeemCoins() {
-    let item = document.getElementById("redeemItem");
-    let cost = item.value;
-    let text = item.options[item.selectedIndex].text;
-
-    // Confirm dialog
-    if(!confirm(`Confirm Redeem: ${text}?`)) return;
-
-    let res = await api({ action: "redeem", mobile, cost, item: text });
-    
-    if(res.success) {
-        // Yahan humne text aur emoji ko ek sath encode kiya hai
-        let messageBody = `Hi EasyGo! 🌟\n\nUser: ${mobile}\nRequested Redemption: ${text}\n\n Thank you! 🙏`;
-        
-        let encodedMsg = encodeURIComponent(messageBody);
-        
-        // WhatsApp link with encoded message
-        window.open(`https://wa.me/917651837322?text=${encodedMsg}`);
-        
-        popup("Redeem Request Sent! ✅");
-        loadWallet();
-    } else {
-        popup(res.error || "Insufficient Balance! ❌");
-    }
-}
-
-    async function loadLeaderboard() {
-        let res = await api({ action: "leaderboard" });
-        let board = document.getElementById("board");
-        board.innerHTML = res.map((u, i) => `
-            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
-                <div class="flex items-center gap-3">
-                    <span class="text-xs font-bold bg-white/10 w-6 h-6 flex items-center justify-center rounded-full">${i+1}</span>
-                    <span class="font-mono">XX${String(u.mobile).slice(-4)}</span>
-                </div>
-                <span class="font-black text-yellow-400">${u.coins} 🪙</span>
-            </div>
-        `).join('');
+        if(res) document.getElementById("coins").innerText = res.coins;
     }
 
     async function claimCode() {
-    let code = document.getElementById("code").value;
-    if(!code) return popup("Enter Secret Code!");
-    
-    let res = await api({ action: "claim", mobile, code });
-    if(res.success) {
-        confetti({ particleCount: 100, spread: 70 });
-        popup(`Success! Added ${res.coins} Coins 🪙`);
-        document.getElementById("code").value = ""; // Input clear karo
-        loadWallet();
-    } else {
-        popup(res.error || "Invalid Code ❌");
-    }
-}
-    function closeWelcome() { document.getElementById("welcomeBanner").classList.add("hidden"); }
-
-    window.onload = async () => {
-    let savedMobile = localStorage.getItem("easygo_user");
-    
-    if(savedMobile) {
-        mobile = savedMobile;
-        
-        // INSTANT HIDE: Bina wait kiye login aur OTP box ko hide karo
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("otpBox").classList.add("hidden");
-        
-        // Loader dikhao (Optional: Aap yahan koi loading spinner daal sakte ho)
-        popup("Welcome back! Loading...");
-
-        let res = await api({ action: "login", mobile: mobile });
-        
+        let code = document.getElementById("code").value;
+        if(!code) return popup("Enter Secret Code!");
+        let res = await api({ action: "claim", mobile, code });
         if(res && res.success) {
-            // Offers check karke render karo
-            if(res.offers && res.offers.length > 0) {
-                renderOffers(res.offers); // Jo function maine pehle diya tha
-            }
-            startApp();
+            confetti({ particleCount: 100, spread: 70 });
+            popup(`Success! Added ${res.coins} Coins 🪙`);
+            document.getElementById("code").value = "";
+            loadWallet();
         } else {
-            // Agar session expire ho gaya ho ya error aaye
-            localStorage.removeItem("easygo_user");
-            location.reload();
+            popup(res.error || "Invalid Code ❌");
         }
     }
-};
+
+    async function redeemCoins() {
+        let item = document.getElementById("redeemItem");
+        let cost = item.value;
+        let text = item.options[item.selectedIndex].text;
+
+        if(!confirm(`Confirm Redeem: ${text}?`)) return;
+
+        let res = await api({ action: "redeem", mobile, cost, item: text });
+        if(res && res.success) {
+            let messageBody = `Hi EasyGo! 🌟\n\nUser: ${mobile}\nRequested Redemption: ${text}\n\nThank you! 🙏`;
+            window.open(`https://wa.me/917651837322?text=${encodeURIComponent(messageBody)}`);
+            popup("Redeem Request Sent! ✅");
+            loadWallet();
+        } else {
+            popup(res.error || "Insufficient Balance! ❌");
+        }
+    }
+
+    async function loadLeaderboard() {
+        let res = await api({ action: "leaderboard" });
+        if(res) {
+            let board = document.getElementById("board");
+            board.innerHTML = res.map((u, i) => `
+                <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                    <div class="flex items-center gap-3">
+                        <span class="text-xs font-bold bg-white/10 w-6 h-6 flex items-center justify-center rounded-full">${i+1}</span>
+                        <span class="font-mono text-sm">XX${String(u.mobile).slice(-4)}</span>
+                    </div>
+                    <span class="font-black text-yellow-400">${u.coins} 🪙</span>
+                </div>`).join('');
+        }
+    }
+
+    function closeWelcome() { document.getElementById("welcomeBanner").classList.add("hidden"); }
+
+    // --- Instant Auto-Login Logic ---
+    window.onload = async () => {
+        let savedMobile = localStorage.getItem("easygo_user");
+        if(savedMobile) {
+            mobile = savedMobile;
+            // Bina delay ke hide karo
+            document.getElementById("login").classList.add("hidden");
+            document.getElementById("otpBox").classList.add("hidden");
+            
+            let res = await api({ action: "login", mobile: mobile });
+            if(res && res.success) {
+                renderOffers(res.offers);
+                startApp();
+            } else {
+                localStorage.removeItem("easygo_user");
+                location.reload();
+            }
+        }
+    };
 </script>
 </body>
 </html>

@@ -8,84 +8,94 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
     <style>
-        body{margin:0;font-family:system-ui;color:white;min-height:100vh;background:url('background.png') no-repeat center/cover fixed}
-        .card{background:rgba(0,0,0,0.7);backdrop-filter:blur(12px);padding:20px;border-radius:26px;box-shadow:0 10px 30px rgba(0,0,0,0.5);animation:fadeUp .5s}
-        @keyframes fadeUp{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:translateY(0)}}
-        .popup{position:fixed;top:20px;left:50%;transform:translateX(-50%);background:#111;padding:14px 20px;border-radius:12px;display:none;z-index:9999;font-weight:bold;border-left:4px solid #f97316}
-        .show{display:block}
-        button{font-weight:bold;transition:.3s;border-radius:50px;text-transform:uppercase;letter-spacing:.5px}
-        button:active{transform:scale(0.96)}
-        .progress-bar{height:6px;background:#222;border-radius:10px;overflow:hidden;margin:10px 0}
-        .progress{height:100%;background:linear-gradient(90deg,#facc15,#f97316);width:0;transition:1.2s linear}
-        input,select{outline:none}
+        body { margin:0; font-family: 'Segoe UI', Roboto, sans-serif; color:white; min-height:100vh; background:url('background.png') no-repeat center/cover fixed; overflow-x: hidden; }
+        .card { background:rgba(255, 255, 255, 0.05); backdrop-filter:blur(16px); -webkit-backdrop-filter:blur(16px); padding:24px; border-radius:32px; border:1px solid rgba(255,255,255,0.1); box-shadow:0 20px 50px rgba(0,0,0,0.4); animation: slideUp 0.6s cubic-bezier(0.23, 1, 0.32, 1); }
+        @keyframes slideUp { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:translateY(0)} }
+        .popup { position:fixed; top:25px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.9); color:#fbbf24; border:1px solid #fbbf24; padding:16px 28px; border-radius:16px; display:none; z-index:9999; font-weight:bold; box-shadow:0 0 20px rgba(251,191,36,0.3); }
+        .show { display:block; animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.27, 1.55); }
+        @keyframes popIn { from{transform:translateX(-50%) scale(0.8); opacity:0} to{transform:translateX(-50%) scale(1); opacity:1} }
+        button { transition: all 0.3s ease; font-weight:800; text-transform:uppercase; letter-spacing:1px; }
+        button:hover { transform: translateY(-2px); filter: brightness(1.1); }
+        button:active { transform: scale(0.96); }
+        select, input { background: rgba(255,255,255,0.9) !important; color: #000 !important; font-weight: 600; }
+        .otp-input { letter-spacing: 12px; font-size: 24px; text-align: center; }
+        .loader-bar { width: 0%; height: 4px; background: #f59e0b; transition: width 1.5s linear; border-radius: 2px; }
     </style>
 </head>
-<body class="flex flex-col items-center">
+<body class="flex justify-center">
 
 <div id="popup" class="popup"></div>
 
-<div id="welcomeBanner" class="fixed inset-0 bg-black/80 flex items-center justify-center z-[9999] hidden">
-    <div class="bg-white text-black p-6 rounded-3xl max-w-sm text-center shadow-2xl">
-        <h2 class="text-2xl font-bold mb-2 text-orange-600">🔥 VIP Launch Offer</h2>
-        <p class="text-sm mb-4">🎁 First Claim par <b>30 Bonus Coins</b> 🪙</p>
-        <button onclick="closeWelcome()" class="bg-orange-500 text-white px-8 py-2 rounded-full w-full">Awesome 🔥</button>
+<div id="welcomeBanner" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] hidden p-5">
+    <div class="card bg-white text-black max-w-sm text-center">
+        <h2 class="text-3xl font-black mb-3 text-orange-600 italic">VIP UNLOCKED!</h2>
+        <p class="text-gray-700 mb-6 font-medium">🎁 First Claim par milenge <span class="text-orange-600 font-bold">30 Bonus Coins</span> 🪙</p>
+        <button onclick="closeWelcome()" class="w-full bg-orange-500 text-white py-4 rounded-2xl shadow-lg shadow-orange-500/30">LFG! 🔥</button>
     </div>
 </div>
 
-<div class="w-full max-w-[420px] p-5">
-    <div class="text-center mb-6">
-        <img src="EasyGo-Logo.png" class="h-16 mx-auto">
-        <h1 class="text-3xl font-bold mt-2 text-yellow-400">EasyGo VIP</h1>
+<div class="w-full max-w-[440px] p-6">
+    <div class="text-center mb-10">
+        <img src="EasyGo-Logo.png" class="h-24 mx-auto drop-shadow-[0_0_15px_rgba(255,255,255,0.5)]">
+        <h1 class="text-4xl font-black mt-4 tracking-tighter text-transparent bg-clip-text bg-gradient-to-r from-yellow-400 to-orange-500">EASYGO VIP</h1>
     </div>
 
     <div id="login" class="card">
-        <h2 class="text-xl mb-4 text-center font-bold">Login</h2>
-        <input id="mobile" type="tel" placeholder="Mobile Number" class="w-full p-4 text-black rounded-2xl mb-4 font-bold text-center">
-        <button onclick="sendOTP()" class="w-full bg-orange-500 py-4 text-white shadow-lg">Send OTP</button>
+        <h2 class="text-xl mb-5 font-black text-center opacity-90">MEMBER LOGIN</h2>
+        <input id="mobile" type="tel" maxlength="10" placeholder="Enter Mobile Number" class="w-full p-5 rounded-2xl mb-5 outline-none text-xl shadow-inner">
+        <button onclick="sendOTP()" class="w-full bg-gradient-to-r from-orange-500 to-red-600 py-5 text-white rounded-2xl shadow-xl shadow-orange-900/40">Get OTP</button>
     </div>
 
     <div id="otpBox" class="card hidden">
-        <h2 class="text-xl mb-2 text-center font-bold">Verifying OTP</h2>
-        <p class="text-center text-xs text-gray-400 mb-2">Auto-reading...</p>
-        <input id="otp" type="number" placeholder="----" class="w-full p-4 text-black rounded-2xl mb-2 text-center text-2xl font-bold tracking-widest">
-        <div class="progress-bar"><div id="otpLoader" class="progress"></div></div>
+        <h2 class="text-xl mb-2 font-black text-center">VERIFYING</h2>
+        <p class="text-center text-sm opacity-60 mb-6">Reading OTP automatically...</p>
+        <input id="otp" type="number" placeholder="0000" class="otp-input w-full p-5 rounded-2xl mb-4 outline-none shadow-inner">
+        <div class="w-full bg-gray-800 rounded-full h-1 mb-6 overflow-hidden">
+            <div id="otpLoader" class="loader-bar"></div>
+        </div>
+        <button onclick="verifyOTP()" class="w-full bg-green-500 py-4 text-white rounded-2xl opacity-50 cursor-not-allowed" id="verifyBtn" disabled>Verifying...</button>
     </div>
 
-    <div id="app" class="hidden space-y-4">
-        <nav class="flex justify-between gap-2 bg-black/30 p-2 rounded-full">
-            <button class="bg-orange-500 text-white flex-1 py-2" onclick="showTab('claim')">Claim</button>
-            <button class="bg-yellow-500 text-black flex-1 py-2" onclick="showTab('wallet')">Wallet</button>
-            <button class="bg-purple-600 text-white flex-1 py-2" onclick="showTab('leaderboard')">Board</button>
+    <div id="app" class="hidden space-y-6">
+        <nav class="flex justify-between gap-3 bg-black/40 p-2 rounded-[28px] border border-white/10">
+            <button class="bg-orange-500 text-white flex-1 py-3 rounded-2xl text-xs" onclick="showTab('claim')">CLAIM</button>
+            <button class="bg-yellow-500 text-black flex-1 py-3 rounded-2xl text-xs" onclick="showTab('wallet')">WALLET</button>
+            <button class="bg-purple-600 text-white flex-1 py-3 rounded-2xl text-xs" onclick="showTab('leaderboard')">BOARD</button>
         </nav>
 
         <div id="claim" class="tab-content card">
-            <h2 class="text-xl font-bold mb-3">Claim Reward</h2>
-            <input id="code" placeholder="Enter code here..." class="w-full p-4 text-black rounded-2xl bg-white mb-4 uppercase">
-            <button onclick="claimCode()" class="w-full bg-orange-500 py-4 shadow-lg text-white">Claim Reward</button>
+            <h2 class="text-xl font-black mb-4">REDEEM CODE</h2>
+            <input id="code" placeholder="Enter Secret Code" class="w-full p-5 rounded-2xl mb-5 uppercase font-mono tracking-widest outline-none">
+            <button onclick="claimCode()" class="w-full bg-orange-600 py-5 rounded-2xl text-white shadow-lg">Submit Code</button>
         </div>
 
-        <div id="wallet" class="tab-content card hidden text-center">
-            <h2 class="text-lg mb-1">Your Coins</h2>
-            <div class="text-5xl text-yellow-400 font-bold mb-4" id="coins">0</div>
-            <h3 class="text-md mb-2 text-left font-semibold">Redeem Coins</h3>
-            <select id="redeemItem" class="w-full p-4 text-black rounded-xl mb-4 font-bold">
-                <option value="90">[2 Pcs] Crispy Mini Samosas 🥟 — 90 Coins</option>
-                <option value="100">[2 Pcs] Crunchy Cheese Balls 🧀 — 100 Coins</option>
-                <option value="150">[70 G] French Fries 🍟 — 150 Coins</option>
-                <option value="200">[2 Pcs] Cheese Corn Nuggets 🌽 — 200 Coins</option>
-                <option value="250">[5 Pcs] Veg Momos 🥟 — 250 Coins</option>
-                <option value="300">[4 Pcs] Spring Roll 🥢 — 300 Coins</option>
-                <option value="350">[5 Pcs] Premium Paneer Momos 🧀 — 350 Coins</option>
-                <option value="400">Full Plate Veg Momos 🍜 — 400 Coins</option>
-                <option value="450">Full Plate Cheese Corn Nuggets 🌽 — 450 Coins</option>
-                <option value="500">VIP 👑 Combo — [7 Pcs] Cheese Corn Momos 🥟 + Fries 🍟 — 500 Coins</option>
+        <div id="wallet" class="tab-content card hidden">
+            <h2 class="text-sm font-bold opacity-60 mb-1">CURRENT BALANCE</h2>
+            <div class="text-6xl text-yellow-400 font-black mb-8 drop-shadow-md" id="coins">0</div>
+
+            <h3 class="text-md font-bold mb-3 text-orange-400">REDEEM COINS</h3>
+            <select id="redeemItem" class="w-full p-4 rounded-2xl mb-5 outline-none appearance-none cursor-pointer">
+                <option value="90">[2 Pcs] Crispy Mini Samosas 🥟 — 90</option>
+                <option value="100">[2 Pcs] Crunchy Cheese Balls 🧀 — 100</option>
+                <option value="150">[70 G] French Fries 🍟 — 150</option>
+                <option value="200">[2 Pcs] Cheese Corn Nuggets 🌽 — 200</option>
+                <option value="250">[5 Pcs] Veg Momos 🥟 — 250</option>
+                <option value="300">[4 Pcs] Spring Roll 🥢 — 300</option>
+                <option value="350">[5 Pcs] Premium Paneer Momos 🧀 — 350</option>
+                <option value="400">Full Plate Veg Momos 🍜 — 400</option>
+                <option value="450">Full Plate Cheese Corn Nuggets 🌽 — 450</option>
+                <option value="500">VIP 👑 Combo — [7 Pcs] Momos + Fries — 500</option>
             </select>
-            <button onclick="redeemCoins()" class="w-full bg-green-500 py-4 text-white">Redeem Now 🪙</button>
+            <button onclick="redeemCoins()" class="w-full bg-green-500 py-5 rounded-2xl text-white shadow-xl shadow-green-900/30 font-black">
+                Redeem Now 🪙
+            </button>
         </div>
 
         <div id="leaderboard" class="tab-content card hidden">
-            <h2 class="text-xl font-bold mb-4 text-center">Top Foodies 🏆</h2>
-            <div id="board" class="space-y-2"></div>
+            <h2 class="text-xl font-black mb-6 flex items-center justify-between">
+                TOP FOODIES 🏆
+            </h2>
+            <div id="board" class="space-y-4"></div>
         </div>
     </div>
 </div>
@@ -94,86 +104,101 @@
     const API="https://script.google.com/macros/s/AKfycbx-wK_hJpZBNN6S2IGRHDzwvB9U50Z7Flit1e74MK_qd1-kULZnt33PK9tBlC6Dl4Td/exec";
     let mobile, generatedOTP;
 
-    function popup(msg){
-        const p=document.getElementById("popup");
-        p.innerText=msg; p.classList.add("show");
-        setTimeout(()=>p.classList.remove("show"),3000);
+    function popup(msg) {
+        const p = document.getElementById("popup");
+        p.innerText = msg;
+        p.classList.add("show");
+        setTimeout(() => p.classList.remove("show"), 3000);
     }
 
-    function showTab(id){
-        document.querySelectorAll('.tab-content').forEach(t=>t.classList.add('hidden'));
+    function showTab(id) {
+        document.querySelectorAll('.tab-content').forEach(t => t.classList.add('hidden'));
         document.getElementById(id).classList.remove('hidden');
     }
 
-    async function api(data){
-        let res=await fetch(API,{method:"POST",body:JSON.stringify(data)});
+    async function api(data) {
+        let res = await fetch(API, { method: "POST", body: JSON.stringify(data) });
         return await res.json();
     }
 
-    function sendOTP(){
-        mobile=document.getElementById("mobile").value;
-        if(mobile.length!=10){ popup("Enter 10 digit mobile"); return; }
-        generatedOTP=Math.floor(1000+Math.random()*9000);
-        popup("OTP Sent: "+generatedOTP);
+    function sendOTP() {
+        mobile = document.getElementById("mobile").value;
+        if(mobile.length !== 10) return popup("Invalid Mobile Number!");
+
+        generatedOTP = Math.floor(1000 + Math.random() * 9000);
+        popup("OTP Sent: " + generatedOTP);
+
         document.getElementById("login").classList.add("hidden");
         document.getElementById("otpBox").classList.remove("hidden");
-        
-        // Auto-fill and Auto-login
-        setTimeout(()=>{
-            document.getElementById("otp").value=generatedOTP;
-            document.getElementById("otpLoader").style.width="100%";
-            setTimeout(verifyOTP, 1300);
-        }, 1000);
+
+        // AUTO-FILL & AUTO-LOGIN LOGIC
+        setTimeout(() => {
+            document.getElementById("otpLoader").style.width = "100%";
+            setTimeout(() => {
+                document.getElementById("otp").value = generatedOTP;
+                verifyOTP(); // Auto-login call
+            }, 1500);
+        }, 500);
     }
 
-    async function verifyOTP(){
-        if(document.getElementById("otp").value==generatedOTP){
-            let res=await api({action:"login",mobile});
-            if(res.success){
-                localStorage.setItem("easygo_user",mobile);
+    async function verifyOTP() {
+        let val = document.getElementById("otp").value;
+        if(val == generatedOTP) {
+            let res = await api({ action: "login", mobile });
+            if(res.success) {
+                localStorage.setItem("easygo_user", mobile);
                 startApp();
                 document.getElementById("welcomeBanner").classList.remove("hidden");
-                confetti({particleCount:100, spread:70, origin:{y:0.6}});
+                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#facc15', '#f97316', '#ffffff'] });
             }
+        } else {
+            popup("Wrong OTP!");
         }
     }
 
-    function startApp(){
+    function startApp() {
         document.getElementById("otpBox").classList.add("hidden");
         document.getElementById("app").classList.remove("hidden");
-        loadWallet(); loadLeaderboard();
+        loadWallet();
+        loadLeaderboard();
     }
 
-    async function loadWallet(){
-        let res=await api({action:"wallet",mobile});
-        document.getElementById("coins").innerText=res.coins;
+    async function loadWallet() {
+        let res = await api({ action: "wallet", mobile });
+        document.getElementById("coins").innerText = res.coins;
     }
 
-    async function redeemCoins(){
-        let item=document.getElementById("redeemItem");
-        let cost=item.value;
-        let text=item.options[item.selectedIndex].text;
-        if(!confirm("Redeem "+text+"?")) return;
-        let res=await api({action:"redeem",mobile,cost});
-        if(res.success){
-            window.open(`https://wa.me/917651837322?text=${encodeURIComponent('Redeemed: '+text+' (User: '+mobile+')')}`);
-            popup("Request Sent!");
+    async function redeemCoins() {
+        let item = document.getElementById("redeemItem");
+        let cost = item.value;
+        let text = item.options[item.selectedIndex].text;
+
+        if(!confirm(`Confirm Redeem: ${text}?`)) return;
+
+        let res = await api({ action: "redeem", mobile, cost });
+        if(res.success) {
+            let msg = encodeURIComponent(`User ${mobile} requested redemption: ${text}`);
+            window.open(`https://wa.me/917651837322?text=${msg}`);
+            popup("Redeem Request Sent!");
             loadWallet();
         }
     }
 
-    async function loadLeaderboard(){
-        let res=await api({action:"leaderboard"});
-        let board=document.getElementById("board");
-        board.innerHTML=res.map((u,i)=>`
-            <div class="flex justify-between border-b border-white/10 py-2 text-sm">
-                <span>${i+1}. XX${String(u.mobile).slice(-4)}</span>
-                <span class="font-bold text-yellow-400">${u.coins} Coins</span>
+    async function loadLeaderboard() {
+        let res = await api({ action: "leaderboard" });
+        let board = document.getElementById("board");
+        board.innerHTML = res.map((u, i) => `
+            <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+                <div class="flex items-center gap-3">
+                    <span class="text-xs font-bold bg-white/10 w-6 h-6 flex items-center justify-center rounded-full">${i+1}</span>
+                    <span class="font-mono">XX${String(u.mobile).slice(-4)}</span>
+                </div>
+                <span class="font-black text-yellow-400">${u.coins} 🪙</span>
             </div>
         `).join('');
     }
 
-    function closeWelcome(){document.getElementById("welcomeBanner").classList.add("hidden")}
+    function closeWelcome() { document.getElementById("welcomeBanner").classList.add("hidden"); }
 </script>
 </body>
 </html>

@@ -258,7 +258,56 @@ async function redeemCoins() {
         `).join('');
     }
 
+    async function claimCode() {
+    let code = document.getElementById("code").value;
+    if(!code) return popup("Enter Secret Code!");
+    
+    let res = await api({ action: "claim", mobile, code });
+    if(res.success) {
+        confetti({ particleCount: 100, spread: 70 });
+        popup(`Success! Added ${res.coins} Coins 🪙`);
+        document.getElementById("code").value = ""; // Input clear karo
+        loadWallet();
+    } else {
+        popup(res.error || "Invalid Code ❌");
+    }
+}
     function closeWelcome() { document.getElementById("welcomeBanner").classList.add("hidden"); }
+
+    window.onload = async () => {
+    let savedMobile = localStorage.getItem("easygo_user");
+    
+    if(savedMobile) {
+        mobile = savedMobile;
+        
+        // Jab user refresh kare, toh backend se sirf offers aur wallet status mangwao
+        let res = await api({ action: "login", mobile: mobile });
+        
+        if(res.success) {
+            // Agar koi offers active hain, toh banner dikhao
+            if(res.offers && res.offers.length > 0) {
+                const container = document.getElementById("offerContainer");
+                container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase">Ongoing Offers</h3>`;
+
+                res.offers.forEach((offer, index) => {
+                    container.innerHTML += `
+                        <div class="relative py-4">
+                            <h2 class="text-xl font-black text-orange-600 italic leading-tight">${offer.title}</h2>
+                            <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
+                            <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
+                                VALUE: ${offer.value} 🪙
+                            </div>
+                            ${index !== res.offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
+                        </div>
+                    `;
+                });
+                document.getElementById("welcomeBanner").classList.remove("hidden");
+            }
+            
+            startApp();
+        }
+    }
+};
 </script>
 </body>
 </html>

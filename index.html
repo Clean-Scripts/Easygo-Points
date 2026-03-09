@@ -20,6 +20,7 @@
         select, input { background: rgba(255,255,255,0.9) !important; color: #000 !important; font-weight: 600; }
         .otp-input { letter-spacing: 12px; font-size: 24px; text-align: center; }
         .loader-bar { width: 0%; height: 4px; background: #f59e0b; transition: width 1.5s linear; border-radius: 2px; }
+        #login.hidden, #otpBox.hidden, #app.hidden { display: none !important; }
     </style>
 </head>
 <body class="flex justify-center">
@@ -137,34 +138,49 @@ async function sendOTP() {
     mobile = document.getElementById("mobile").value;
     if(mobile.length !== 10) return popup("Enter 10 digit mobile!");
 
-    // Button loading state (Optional but good for UI)
+    // Button loading state & UI protection
     const btn = document.querySelector("#login button");
-    btn.innerText = "Sending...";
+    const originalText = btn.innerText;
+    btn.innerText = "Processing...";
     btn.disabled = true;
+    btn.style.opacity = "0.7";
 
-    // Backend se OTP mangwana
-    let res = await api({ action: "sendOTP", mobile });
-    
-    if(res.success) {
-        generatedOTP = res.otp; // Backend ne jo OTP bheja wo yahan save hoga
-        popup("OTP Sent: " + generatedOTP);
+    try {
+        // Backend se OTP mangwana
+        let res = await api({ action: "sendOTP", mobile });
+        
+        if(res && res.success) {
+            generatedOTP = res.otp;
+            popup("OTP Sent: " + generatedOTP);
 
-        // UI Change: Login chhupao, OTP dikhao
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("otpBox").classList.remove("hidden");
+            // 1. Pehle OTP input ko bilkul khali karo (Purana glitch hatane ke liye)
+            document.getElementById("otp").value = "";
+            document.getElementById("otpLoader").style.width = "0%";
 
-        // AUTO-FILL & AUTO-LOGIN LOGIC
-        setTimeout(() => {
-            document.getElementById("otpLoader").style.width = "100%";
+            // 2. UI Change: Login chhupao, OTP dikhao
+            document.getElementById("login").classList.add("hidden");
+            document.getElementById("otpBox").classList.remove("hidden");
+
+            // 3. AUTO-FILL & AUTO-LOGIN LOGIC
             setTimeout(() => {
-                document.getElementById("otp").value = generatedOTP;
-                verifyOTP(); // Auto-verify call
-            }, 1500);
-        }, 500);
-    } else {
-        popup("Error sending OTP");
-        btn.innerText = "Get OTP";
+                // Loader bar start
+                const loader = document.getElementById("otpLoader");
+                if(loader) loader.style.width = "100%";
+                
+                setTimeout(() => {
+                    document.getElementById("otp").value = generatedOTP;
+                    verifyOTP(); // Auto-verify call
+                }, 1200); // 1.2s delay for smooth fill
+            }, 400);
+
+        } else {
+            throw new Error("Failed to get response");
+        }
+    } catch (err) {
+        popup("Error sending OTP ❌");
+        btn.innerText = originalText;
         btn.disabled = false;
+        btn.style.opacity = "1";
     }
 }
 
@@ -280,31 +296,25 @@ async function redeemCoins() {
     if(savedMobile) {
         mobile = savedMobile;
         
-        // Jab user refresh kare, toh backend se sirf offers aur wallet status mangwao
+        // INSTANT HIDE: Bina wait kiye login aur OTP box ko hide karo
+        document.getElementById("login").classList.add("hidden");
+        document.getElementById("otpBox").classList.add("hidden");
+        
+        // Loader dikhao (Optional: Aap yahan koi loading spinner daal sakte ho)
+        popup("Welcome back! Loading...");
+
         let res = await api({ action: "login", mobile: mobile });
         
-        if(res.success) {
-            // Agar koi offers active hain, toh banner dikhao
+        if(res && res.success) {
+            // Offers check karke render karo
             if(res.offers && res.offers.length > 0) {
-                const container = document.getElementById("offerContainer");
-                container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase">Ongoing Offers</h3>`;
-
-                res.offers.forEach((offer, index) => {
-                    container.innerHTML += `
-                        <div class="relative py-4">
-                            <h2 class="text-xl font-black text-orange-600 italic leading-tight">${offer.title}</h2>
-                            <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
-                            <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
-                                VALUE: ${offer.value} 🪙
-                            </div>
-                            ${index !== res.offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
-                        </div>
-                    `;
-                });
-                document.getElementById("welcomeBanner").classList.remove("hidden");
+                renderOffers(res.offers); // Jo function maine pehle diya tha
             }
-            
             startApp();
+        } else {
+            // Agar session expire ho gaya ho ya error aaye
+            localStorage.removeItem("easygo_user");
+            location.reload();
         }
     }
 };

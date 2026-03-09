@@ -191,34 +191,42 @@ async function verifyOTP() {
         if(res.success) {
             localStorage.setItem("easygo_user", mobile);
             
-            if(res.offers && res.offers.length > 0) {
-                const container = document.getElementById("offerContainer");
-                container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase">Special Offers For You</h3>`;
-
-                res.offers.forEach((offer, index) => {
-                    container.innerHTML += `
-                        <div class="relative py-4">
-                            <h2 class="text-xl font-black text-orange-600 italic leading-tight">${offer.title}</h2>
-                            
-                            <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
-                            
-                            <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
-                                VALUE: ${offer.value} 🪙
-                            </div>
-
-                            ${index !== res.offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
-                        </div>
-                    `;
-                });
-
-                document.getElementById("welcomeBanner").classList.remove("hidden");
-            }
+            // Ab loop likhne ki zaroorat nahi, sirf function call karo
+            renderOffers(res.offers);
 
             startApp();
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
     } else {
         popup("Wrong OTP!");
+    }
+
+            startApp();
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        }
+    } else {
+        popup("Wrong OTP!");
+    }
+}
+
+    function renderOffers(offers) {
+    if (offers && offers.length > 0) {
+        const container = document.getElementById("offerContainer");
+        container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase italic">Special Offers For You</h3>`;
+
+        offers.forEach((offer, index) => {
+            container.innerHTML += `
+                <div class="relative py-4">
+                    <h2 class="text-xl font-black text-orange-600 italic leading-tight">${offer.title}</h2>
+                    <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
+                    <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
+                        VALUE: ${offer.value} 🪙
+                    </div>
+                    ${index !== offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
+                </div>
+            `;
+        });
+        document.getElementById("welcomeBanner").classList.remove("hidden");
     }
 }
 

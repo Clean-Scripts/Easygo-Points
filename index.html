@@ -28,9 +28,12 @@
 
 <div id="welcomeBanner" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] hidden p-5">
     <div class="card bg-white text-black max-w-sm text-center">
-        <h2 class="text-3xl font-black mb-3 text-orange-600 italic">VIP UNLOCKED!</h2>
-        <p class="text-gray-700 mb-6 font-medium">🎁 First Claim par milenge <span class="text-orange-600 font-bold">30 Bonus Coins</span> 🪙</p>
-        <button onclick="closeWelcome()" class="w-full bg-orange-500 text-white py-4 rounded-2xl shadow-lg shadow-orange-500/30">Let's Goo! 🔥</button>
+        <h2 class="text-3xl font-black mb-3 text-orange-600 italic"></h2>
+        <p class="text-gray-700 mb-6 font-medium"></p>
+        
+        <button onclick="closeWelcome()" class="w-full bg-orange-500 text-white py-4 rounded-2xl shadow-lg shadow-orange-500/30">
+            Let's Go! 🔥
+        </button>
     </div>
 </div>
 
@@ -104,7 +107,7 @@
 </div>
 
 <script>
-    const API="https://script.google.com/macros/s/AKfycbxXEMf5EwQnYuV1xU8Of2yYJ6JU_GSPfh6u5Lntqwy7N2Z_hVjNmTd3_LV_5VCQAZT9/exec";
+    const API="https://script.google.com/macros/s/AKfycbysfriqRDdJqYRAHKnRZeL8yA4gdz49WzVG3PqKFRyy2lTxGS8a4BTS1CZDYhwhggux/exec";
     let mobile, generatedOTP;
 
     function popup(msg) {
@@ -160,18 +163,25 @@ async function sendOTP() {
 }
 
 async function verifyOTP() {
-    let val = document.getElementById("otp").value;
-    if(val == generatedOTP) {
-        // Backend login call taaki sheets check hon (New user/Old user)
+    if(document.getElementById("otp").value == generatedOTP) {
         let res = await api({ action: "login", mobile });
+        
         if(res.success) {
             localStorage.setItem("easygo_user", mobile);
+            
+            // AGAR SHEET MEIN OFFER HAI TO BANNER UPDATE KARO
+            if(res.offer) {
+                const banner = document.getElementById("welcomeBanner");
+                banner.querySelector("h2").innerText = res.offer.title; // Sheet ka Title
+                banner.querySelector("p").innerHTML = res.offer.message; // Sheet ka Message
+                banner.classList.remove("hidden");
+            }
+
             startApp();
-            document.getElementById("welcomeBanner").classList.remove("hidden");
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
     } else {
-        popup("Wrong OTP! Try again.");
+        popup("Wrong OTP!");
     }
 }
 

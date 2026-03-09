@@ -70,10 +70,11 @@
     </div>
 
     <div id="app" class="hidden space-y-6">
-        <nav class="flex justify-between gap-3 bg-black/40 p-2 rounded-[28px] border border-white/10">
-            <button class="bg-orange-500 text-white flex-1 py-3 rounded-2xl text-xs" onclick="showTab('claim')">CLAIM</button>
-            <button class="bg-yellow-500 text-black flex-1 py-3 rounded-2xl text-xs" onclick="showTab('wallet')">WALLET</button>
-            <button class="bg-purple-600 text-white flex-1 py-3 rounded-2xl text-xs" onclick="showTab('leaderboard')">BOARD</button>
+        <nav class="flex justify-between gap-2 bg-black/40 p-2 rounded-[28px] border border-white/10">
+            <button class="bg-orange-500 text-white flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('claim')">CLAIM</button>
+            <button class="bg-yellow-500 text-black flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('wallet')">WALLET</button>
+            <button class="bg-blue-600 text-white flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('referTab')">REFER & EARN</button>
+            <button class="bg-purple-600 text-white flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('leaderboard')">LEADER-BOARD</button>
         </nav>
 
         <div id="claim" class="tab-content card">
@@ -105,6 +106,25 @@
             </button>
         </div>
 
+
+        <div id="referTab" class="tab-content card hidden">
+            <h2 class="text-xl font-black mb-2 text-blue-400">REFER & EARN 🎁</h2>
+            <p class="text-xs text-gray-400 mb-5">Doston ko refer karein aur payein 40 Coins unke pehle claim par!</p>
+        
+            <div class="bg-white/5 p-4 rounded-2xl mb-6 border border-white/10">
+                <input id="friendMobile" type="tel" maxlength="10" placeholder="Friend's Mobile Number" 
+                       class="w-full p-4 rounded-xl mb-4 text-black font-bold outline-none text-center">
+                <button onclick="submitReferral()" class="w-full bg-blue-600 py-4 rounded-xl text-white font-black shadow-lg shadow-blue-900/40">
+                    INVITE FRIEND
+                </button>
+            </div>
+        
+            <h3 class="text-sm font-bold mb-3 opacity-60">MY REFERRALS</h3>
+            <div id="referralList" class="space-y-3 max-h-[200px] overflow-y-auto pr-1">
+                <p class="text-xs text-gray-500 text-center italic">No referrals yet.</p>
+            </div>
+        </div>
+        
         <div id="leaderboard" class="tab-content card hidden">
             <h2 class="text-xl font-black mb-6 flex items-center justify-between">
                 TOP FOODIES 🏆
@@ -194,33 +214,34 @@
         }
     }
 
-    // --- Core Functions ---
-    function renderOffers(offers) {
-        if (offers && offers.length > 0) {
-            const container = document.getElementById("offerContainer");
-            container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase italic">Special Offers For You</h3>`;
-            offers.forEach((offer, index) => {
-                container.innerHTML += `
-                    <div class="relative py-4 text-left">
-                        <h2 class="text-xl font-black text-orange-600 italic leading-tight uppercase">${offer.title}</h2>
-                        <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
-                        <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
-                            VALUE: ${offer.value} 🪙
-                        </div>
-                        ${index !== offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
-                    </div>`;
-            });
-            document.getElementById("welcomeBanner").classList.remove("hidden");
-        }
-    }
+                // --- Core Functions ---
+                function renderOffers(offers) {
+                    if (offers && offers.length > 0) {
+                        const container = document.getElementById("offerContainer");
+                        container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase italic">Special Offers For You</h3>`;
+                        offers.forEach((offer, index) => {
+                            container.innerHTML += `
+                                <div class="relative py-4 text-left">
+                                    <h2 class="text-xl font-black text-orange-600 italic leading-tight uppercase">${offer.title}</h2>
+                                    <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
+                                    <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
+                                        VALUE: ${offer.value} 🪙
+                                    </div>
+                                    ${index !== offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
+                                </div>`;
+                        });
+                        document.getElementById("welcomeBanner").classList.remove("hidden");
+                    }
+                }
 
-    function startApp() {
-        document.getElementById("login").classList.add("hidden");
-        document.getElementById("otpBox").classList.add("hidden");
-        document.getElementById("app").classList.remove("hidden");
-        loadWallet();
-        loadLeaderboard();
-    }
+            function startApp() {
+                document.getElementById("login").classList.add("hidden");
+                document.getElementById("otpBox").classList.add("hidden");
+                document.getElementById("app").classList.remove("hidden");
+                loadWallet();
+                loadLeaderboard();
+                loadReferralStatus(); // Ye line add karo
+            }
 
     async function loadWallet() {
         let res = await api({ action: "wallet", mobile });
@@ -293,6 +314,48 @@ async function loadLeaderboard() {
 
     function closeWelcome() { document.getElementById("welcomeBanner").classList.add("hidden"); }
 
+// 1. Referral Submit Logic
+async function submitReferral() {
+    let friend = document.getElementById("friendMobile").value;
+    if(friend.length !== 10) return popup("Enter valid 10-digit mobile! ❌");
+    if(friend === mobile) return popup("You can't refer yourself! 😂");
+    
+    popup("Processing...");
+    let res = await api({ action: "refer", mobile: mobile, friend: friend });
+    
+    if(res && res.success) {
+        popup(res.message);
+        document.getElementById("friendMobile").value = "";
+        loadReferralStatus(); // Refresh list
+    } else {
+        popup(res.error || "Referral failed!");
+    }
+}
+
+// 2. My Referrals Status Load Logic
+async function loadReferralStatus() {
+    let res = await api({ action: "myReferrals", mobile: mobile });
+    let listContainer = document.getElementById("referralList");
+    
+    if(res && res.length > 0) {
+        listContainer.innerHTML = res.map(r => `
+            <div class="flex justify-between items-center bg-white/5 p-3 rounded-xl border border-white/5">
+                <div class="flex flex-col">
+                    <span class="text-sm font-mono">${r.friend}</span>
+                    <span class="text-[9px] opacity-40">${new Date(r.date).toLocaleDateString()}</span>
+                </div>
+                <span class="text-[10px] font-black px-2 py-1 rounded-md ${r.status === 'Success' ? 'bg-green-500/20 text-green-400' : 'bg-yellow-500/20 text-yellow-400'}">
+                    ${r.status.toUpperCase()}
+                </span>
+            </div>
+        `).join('');
+    } else {
+        listContainer.innerHTML = `<p class="text-xs text-gray-500 text-center italic">No referrals yet.</p>`;
+    }
+}
+
+
+    
     // --- Instant Auto-Login Logic ---
     window.onload = async () => {
         let savedMobile = localStorage.getItem("easygo_user");

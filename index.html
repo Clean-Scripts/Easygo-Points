@@ -259,20 +259,37 @@
         }
     }
 
-    async function loadLeaderboard() {
-        let res = await api({ action: "leaderboard" });
-        if(res) {
-            let board = document.getElementById("board");
-            board.innerHTML = res.map((u, i) => `
-                <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5">
+async function loadLeaderboard() {
+    let res = await api({ action: "leaderboard" });
+    if(res) {
+        let board = document.getElementById("board");
+        board.innerHTML = res.map((u, i) => {
+            // WhatsApp Reminder Logic
+            let reminderBtn = "";
+            if(u.expiry) {
+                let msg = `Hi VIP! 🌟 Aapke ${u.expiry.coins} Coins 🪙 agle ${u.expiry.days} dino mein expire hone wale hain. Jaldi se kuch aur earn karke Samosa ya Momos redeem karein! 🥟🍟`;
+                let waLink = `https://wa.me/91${u.mobile}?text=${encodeURIComponent(msg)}`;
+                
+                reminderBtn = `
+                    <a href="${waLink}" target="_blank" class="text-[10px] bg-red-500/20 text-red-400 px-2 py-1 rounded-lg border border-red-500/30 animate-pulse">
+                        Remind 🔔
+                    </a>`;
+            }
+
+            return `
+                <div class="flex justify-between items-center bg-white/5 p-4 rounded-2xl border border-white/5 mb-2">
                     <div class="flex items-center gap-3">
                         <span class="text-xs font-bold bg-white/10 w-6 h-6 flex items-center justify-center rounded-full">${i+1}</span>
-                        <span class="font-mono text-sm">XX${String(u.mobile).slice(-4)}</span>
+                        <div class="flex flex-col">
+                            <span class="font-mono text-sm">XX${String(u.mobile).slice(-4)}</span>
+                            ${reminderBtn} 
+                        </div>
                     </div>
                     <span class="font-black text-yellow-400">${u.coins} 🪙</span>
-                </div>`).join('');
-        }
+                </div>`;
+        }).join('');
     }
+}
 
     function closeWelcome() { document.getElementById("welcomeBanner").classList.add("hidden"); }
 

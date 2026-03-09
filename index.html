@@ -70,12 +70,27 @@
     </div>
 
     <div id="app" class="hidden space-y-6">
-        <nav class="flex justify-between gap-2 bg-black/40 p-2 rounded-[28px] border border-white/10">
-            <button class="bg-orange-500 text-white flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('claim')">CLAIM</button>
-            <button class="bg-yellow-500 text-black flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('wallet')">WALLET</button>
-            <button class="bg-blue-600 text-white flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('referTab')">REFER & EARN</button>
-            <button class="bg-purple-600 text-white flex-1 py-3 rounded-2xl text-[10px]" onclick="showTab('leaderboard')">LEADER-BOARD</button>
-        </nav>
+                <nav class="flex justify-between gap-2 bg-black/40 p-2 rounded-[28px] border border-white/10 backdrop-blur-md">
+                    <button class="bg-orange-500 text-white flex-1 py-3 rounded-2xl text-[10px] font-black tracking-tighter uppercase transition-all active:scale-95" 
+                            onclick="showTab('claim')">
+                        CLAIM
+                    </button>
+                    
+                    <button class="bg-yellow-500 text-black flex-1 py-3 rounded-2xl text-[10px] font-black tracking-tighter uppercase transition-all active:scale-95" 
+                            onclick="showTab('wallet')">
+                        WALLET
+                    </button>
+                    
+                    <button class="bg-blue-600 text-white flex-1 py-3 rounded-2xl text-[10px] font-black tracking-tighter uppercase transition-all active:scale-95" 
+                            onclick="showTab('referTab')">
+                        REFER
+                    </button>
+                    
+                    <button class="bg-purple-600 text-white flex-1 py-3 rounded-2xl text-[10px] font-black tracking-tighter uppercase transition-all active:scale-95" 
+                            onclick="showTab('leaderboard')">
+                        BOARD
+                    </button>
+                </nav>
 
         <div id="claim" class="tab-content card">
             <h2 class="text-xl font-black mb-4">REDEEM CODE</h2>
@@ -106,24 +121,30 @@
             </button>
         </div>
 
-
-        <div id="referTab" class="tab-content card hidden">
-            <h2 class="text-xl font-black mb-2 text-blue-400">REFER & EARN 🎁</h2>
-            <p class="text-xs text-gray-400 mb-5">Doston ko refer karein aur payein 40 Coins unke pehle claim par!</p>
-        
-            <div class="bg-white/5 p-4 rounded-2xl mb-6 border border-white/10">
-                <input id="friendMobile" type="tel" maxlength="10" placeholder="Friend's Mobile Number" 
-                       class="w-full p-4 rounded-xl mb-4 text-black font-bold outline-none text-center">
-                <button onclick="submitReferral()" class="w-full bg-blue-600 py-4 rounded-xl text-white font-black shadow-lg shadow-blue-900/40">
-                    INVITE FRIEND
-                </button>
+            
+            <div id="referTab" class="tab-content card hidden">
+                <h2 class="text-xl font-black mb-2 text-blue-400">REFER & EARN 🎁</h2>
+                <p class="text-xs text-gray-400 mb-5">Doston ko refer karein aur payein 40 Coins unke pehle claim par!</p>
+            
+                <div class="bg-white/5 p-4 rounded-2xl mb-6 border border-white/10">
+                    <input id="friendMobile" type="tel" maxlength="10" placeholder="Friend's Mobile Number" 
+                           class="w-full p-4 rounded-xl mb-4 text-black font-bold outline-none text-center">
+                    
+                    <div class="flex gap-2">
+                        <button onclick="submitReferral()" class="flex-1 bg-blue-600 py-4 rounded-xl text-white text-xs font-black shadow-lg">
+                            REGISTER NUMBER
+                        </button>
+                        <button onclick="shareInvite()" class="bg-green-500 p-4 rounded-xl text-white shadow-lg">
+                            <img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" class="w-6 h-6">
+                        </button>
+                    </div>
+                </div>
+            
+                <h3 class="text-sm font-bold mb-3 opacity-60">MY REFERRALS</h3>
+                <div id="referralList" class="space-y-3 max-h-[200px] overflow-y-auto pr-1">
+                    <p class="text-xs text-gray-500 text-center italic">Opss No Referrals !!</p>
+                </div>
             </div>
-        
-            <h3 class="text-sm font-bold mb-3 opacity-60">MY REFERRALS</h3>
-            <div id="referralList" class="space-y-3 max-h-[200px] overflow-y-auto pr-1">
-                <p class="text-xs text-gray-500 text-center italic">No referrals yet.</p>
-            </div>
-        </div>
         
         <div id="leaderboard" class="tab-content card hidden">
             <h2 class="text-xl font-black mb-6 flex items-center justify-between">
@@ -355,6 +376,25 @@ async function loadReferralStatus() {
 }
 
 
+   function shareInvite() {
+    let friend = document.getElementById("friendMobile").value;
+    
+    // Invitation Message with Emojis
+    let msg = `Hey! 🌟 I've just invited you to join EasyGo VIP Rewards! 🍔🎉\n\nGet Coins and Free Goodies on your first visit!\n\nSign in now: https://clean-scripts.github.io/Easygo-Points/\n\nLet's enjoy Rewards Together! 🚀`;
+    
+    let encodedMsg = encodeURIComponent(msg);
+    let url = "";
+
+    if(friend.length === 10) {
+        // Agar number dala hai toh seedha uski chat khulegi
+        url = `https://wa.me/91${friend}?text=${encodedMsg}`;
+    } else {
+        // Agar number nahi dala toh WhatsApp contact picker khulega
+        url = `https://api.whatsapp.com/send?text=${encodedMsg}`;
+    }
+    
+    window.open(url, '_blank');
+} 
     
     // --- Instant Auto-Login Logic ---
     window.onload = async () => {

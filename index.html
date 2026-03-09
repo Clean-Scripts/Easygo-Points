@@ -26,16 +26,23 @@
 
 <div id="popup" class="popup"></div>
 
-<div id="welcomeBanner" class="fixed inset-0 bg-black/80 backdrop-blur-sm flex items-center justify-center z-[9999] hidden p-5">
-    <div class="card bg-white text-black max-w-sm text-center">
-        <h2 class="text-3xl font-black mb-3 text-orange-600 italic"></h2>
-        <p class="text-gray-700 mb-6 font-medium"></p>
+<div id="welcomeBanner" class="fixed inset-0 bg-black/90 backdrop-blur-md flex items-center justify-center z-[9999] hidden p-5">
+    <div class="bg-white text-black p-6 rounded-[32px] max-w-sm w-full shadow-2xl max-h-[85vh] flex flex-col">
         
-        <button onclick="closeWelcome()" class="w-full bg-orange-500 text-white py-4 rounded-2xl shadow-lg shadow-orange-500/30">
-            Let's Go! 🔥
+        <div id="offerContainer" class="overflow-y-auto flex-1 pr-2 custom-scrollbar">
+            </div>
+        
+        <button onclick="closeWelcome()" class="w-full bg-gradient-to-r from-orange-500 to-red-600 text-white py-4 rounded-2xl shadow-lg mt-5 font-black tracking-widest">
+            CLAIM NOW ! 🔥
         </button>
     </div>
 </div>
+
+<style>
+    /* Chota sa scrollbar design taaki bura na lage */
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #e2e8f0; border-radius: 10px; }
+</style>
 
 <div class="w-full max-w-[420px] p-6 mx-auto"> 
     <div class="text-center mb-10">
@@ -162,31 +169,37 @@ async function sendOTP() {
 }
 
 async function verifyOTP() {
-    let val = document.getElementById("otp").value;
-    if(val == generatedOTP) {
-        // Backend login call
+    if(document.getElementById("otp").value == generatedOTP) {
         let res = await api({ action: "login", mobile });
         
         if(res.success) {
             localStorage.setItem("easygo_user", mobile);
             
-            // Step 1: Check for Offer Banner
-            if(res.offer) {
-                const banner = document.getElementById("welcomeBanner");
-                banner.querySelector("h2").innerText = res.offer.title; 
-                banner.querySelector("p").innerHTML = res.offer.message; 
-                banner.classList.remove("hidden");
-                // Note: Is case mein user 'Let's Go' button dabayega tabhi aage dikhega
+            if(res.offers && res.offers.length > 0) {
+                const container = document.getElementById("offerContainer");
+                container.innerHTML = `<h3 class="text-center font-black text-gray-400 text-xs mb-4 tracking-widest uppercase">Special Offers For You</h3>`;
+
+                res.offers.forEach((offer, index) => {
+                    container.innerHTML += `
+                        <div class="relative py-4">
+                            <h2 class="text-xl font-black text-orange-600 italic leading-tight">${offer.title}</h2>
+                            
+                            <p class="text-gray-600 text-sm mt-1 font-medium leading-relaxed">${offer.message}</p>
+                            
+                            <div class="mt-3 inline-block bg-yellow-100 text-yellow-700 px-3 py-1 rounded-full text-xs font-black border border-yellow-200">
+                                VALUE: ${offer.value} 🪙
+                            </div>
+
+                            ${index !== res.offers.length - 1 ? '<div class="mt-5 border-b-2 border-dotted border-gray-100 w-full"></div>' : ''}
+                        </div>
+                    `;
+                });
+
+                document.getElementById("welcomeBanner").classList.remove("hidden");
             }
 
-            // Step 2: ALWAYS call startApp to show the main UI
             startApp();
-            
-            // Celebration!
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-        } else {
-            popup("Login Failed. Try Again.");
-            location.reload(); // Reload if backend fails
         }
     } else {
         popup("Wrong OTP!");
@@ -205,21 +218,31 @@ async function verifyOTP() {
         document.getElementById("coins").innerText = res.coins;
     }
 
-    async function redeemCoins() {
-        let item = document.getElementById("redeemItem");
-        let cost = item.value;
-        let text = item.options[item.selectedIndex].text;
+async function redeemCoins() {
+    let item = document.getElementById("redeemItem");
+    let cost = item.value;
+    let text = item.options[item.selectedIndex].text;
 
-        if(!confirm(`Confirm Redeem: ${text}?`)) return;
+    // Confirm dialog
+    if(!confirm(`Confirm Redeem: ${text}?`)) return;
 
-        let res = await api({ action: "redeem", mobile, cost });
-        if(res.success) {
-            let msg = encodeURIComponent(`User ${mobile} requested redemption: ${text}`);
-            window.open(`https://wa.me/917651837322?text=${msg}`);
-            popup("Redeem Request Sent!");
-            loadWallet();
-        }
+    let res = await api({ action: "redeem", mobile, cost, item: text });
+    
+    if(res.success) {
+        // Yahan humne text aur emoji ko ek sath encode kiya hai
+        let messageBody = `Hi EasyGo! 🌟\n\nUser: ${mobile}\nRequested Redemption: ${text}\n\n Thank you! 🙏`;
+        
+        let encodedMsg = encodeURIComponent(messageBody);
+        
+        // WhatsApp link with encoded message
+        window.open(`https://wa.me/917651837322?text=${encodedMsg}`);
+        
+        popup("Redeem Request Sent! ✅");
+        loadWallet();
+    } else {
+        popup(res.error || "Insufficient Balance! ❌");
     }
+}
 
     async function loadLeaderboard() {
         let res = await api({ action: "leaderboard" });

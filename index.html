@@ -2,364 +2,479 @@
 <html lang="en">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <title>EasyGo VIP</title>
-    <link rel="icon" href="EasyGo-Logo.png" type="image/png">
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
-    <style>
-        /* ------------------ GENERAL ------------------ */
-        body {
-            margin: 0;
-            font-family: system-ui;
-            color: white;
-            height: 100vh;
-            background: url('background.png') no-repeat center/cover;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>EasyGo VIP</title>
+<link rel="icon" href="EasyGo-Logo.png" type="image/png">
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
 
-        .app {
-            max-width: 420px;
-            margin: auto;
-            padding: 20px;
-        }
+<style>
+body{
+margin:0;
+font-family:system-ui;
+color:white;
+height:100vh;
+background:url('background.png') no-repeat center/cover;
+}
 
-        /* ------------------ CARD ------------------ */
-        .card {
-            background: rgba(0, 0, 0, 0.6);
-            backdrop-filter: blur(10px);
-            padding: 20px;
-            border-radius: 26px;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-            animation: fadeUp .5s;
-        }
+.app{
+max-width:420px;
+margin:auto;
+padding:20px;
+}
 
-        @keyframes fadeUp {
-            from { opacity: 0; transform: translateY(20px) }
-            to { opacity: 1; transform: translateY(0) }
-        }
+.card{
+background:rgba(0,0,0,0.6);
+backdrop-filter:blur(10px);
+padding:20px;
+border-radius:26px;
+box-shadow:0 10px 30px rgba(0,0,0,0.5);
+animation:fadeUp .5s;
+}
 
-        #claimSectionCoins {
-            text-shadow: 0 0 8px rgba(250, 204, 21, 0.6);
-            font-family: 'Courier New', Courier, monospace;
-        }
+@keyframes fadeUp{
+from{opacity:0;transform:translateY(20px)}
+to{opacity:1;transform:translateY(0)}
+}
 
-        /* ------------------ POPUP ------------------ */
-        .popup {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            background: #111;
-            padding: 14px 20px;
-            border-radius: 8px;
-            display: none;
-            z-index: 9999;
-            font-weight: bold;
-            text-align: center;
-        }
+#claimSectionCoins{
+text-shadow:0 0 8px rgba(250,204,21,0.6);
+font-family:'Courier New',Courier,monospace;
+}
 
-        .show { display: block; }
+.popup{
+position:fixed;
+top:20px;
+left:50%;
+transform:translateX(-50%);
+background:#111;
+padding:14px 20px;
+border-radius:8px;
+display:none;
+z-index:9999;
+font-weight:bold;
+text-align:center;
+}
 
-        /* ------------------ BUTTONS ------------------ */
-        button {
-            font-weight: bold;
-            transition: 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer;
-            border: none;
-            border-radius: 50px;
-            padding: 10px 24px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            font-size: 14px;
-        }
+.show{display:block;}
 
-        button:hover {
-            transform: translateY(-3px) scale(1.05);
-            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.3);
-        }
+button{
+font-weight:bold;
+transition:.4s cubic-bezier(.175,.885,.32,1.275);
+cursor:pointer;
+border:none;
+border-radius:50px;
+padding:10px 24px;
+display:flex;
+align-items:center;
+justify-content:center;
+text-transform:uppercase;
+letter-spacing:.5px;
+font-size:14px;
+}
 
-        /* Live Badge Animation */
-        .bg-yellow-500\/20 {
-            animation: livePulse 2s infinite ease-in-out;
-        }
+button:hover{
+transform:translateY(-3px) scale(1.05);
+box-shadow:0 10px 20px rgba(0,0,0,0.3);
+}
 
-        @keyframes livePulse {
-            0% { opacity: 0.8; box-shadow: 0 0 0px rgba(250, 204, 21, 0); }
-            50% { opacity: 1; box-shadow: 0 0 10px rgba(250, 204, 21, 0.4); }
-            100% { opacity: 0.8; box-shadow: 0 0 0px rgba(250, 204, 21, 0); }
-        }
+.bg-yellow-500\/20{
+animation:livePulse 2s infinite ease-in-out;
+}
 
-        #code { box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1); }
+@keyframes livePulse{
+0%{opacity:.8;box-shadow:0 0 0 rgba(250,204,21,0)}
+50%{opacity:1;box-shadow:0 0 10px rgba(250,204,21,.4)}
+100%{opacity:.8;box-shadow:0 0 0 rgba(250,204,21,0)}
+}
 
-        h1, h2, h3 { text-shadow: 0 0 5px #f97316, 0 0 10px #facc15; }
+#code{box-shadow:inset 0 2px 4px rgba(0,0,0,0.1)}
 
-        .coin-fly {
-            position: absolute;
-            width: 24px;
-            height: 24px;
-            background: url('coin.png') no-repeat center/cover;
-            pointer-events: none;
-            z-index: 9999;
-        }
+h1,h2,h3{text-shadow:0 0 5px #f97316,0 0 10px #facc15}
 
-        /* ------------------ MILESTONE ------------------ */
-        .progress-bar { height: 20px; background: #222; border-radius: 10px; overflow: hidden; margin: 10px 0; }
-        .progress { height: 100%; background: linear-gradient(90deg, #facc15, #f97316); width: 0; transition: 0.5s; }
-        .milestone-badge { display: inline-block; margin: 2px; padding: 4px 8px; border-radius: 8px; background: #222; color: #fff; transition: 0.3s; }
-        .milestone-badge.reached {
-            background: yellow;
-            color: black;
-            font-weight: bold;
-            transform: scale(1.1);
-            animation: badgeGlow 1s infinite alternate;
-        }
+.progress-bar{height:20px;background:#222;border-radius:10px;overflow:hidden;margin:10px 0}
+.progress{height:100%;background:linear-gradient(90deg,#facc15,#f97316);width:0;transition:.5s}
 
-        @keyframes badgeGlow { from { box-shadow: 0 0 5px yellow; } to { box-shadow: 0 0 20px gold; } }
+.milestone-badge{
+display:inline-block;
+margin:2px;
+padding:4px 8px;
+border-radius:8px;
+background:#222;
+color:#fff;
+transition:.3s;
+}
 
-        /* ------------------ LEADERBOARD ------------------ */
-        #board div:hover { background: rgba(255, 255, 255, 0.1); border-radius: 8px; }
-        .medal { font-size: 20px; }
-    </style>
+.milestone-badge.reached{
+background:yellow;
+color:black;
+font-weight:bold;
+transform:scale(1.1);
+animation:badgeGlow 1s infinite alternate;
+}
+
+@keyframes badgeGlow{
+from{box-shadow:0 0 5px yellow}
+to{box-shadow:0 0 20px gold}
+}
+
+#board div:hover{
+background:rgba(255,255,255,.1);
+border-radius:8px;
+}
+</style>
 </head>
 
 <body>
-    <div id="popup" class="popup"></div>
 
-    <div class="app">
-        <div class="text-center mb-6">
-            <img src="EasyGo-Logo.png" class="h-16 mx-auto">
-            <h1 class="text-3xl font-bold mt-2">EasyGo VIP Rewards</h1>
-        </div>
+<div id="popup" class="popup"></div>
 
-        <div id="login" class="card">
-            <h2 class="text-xl mb-4 text-center font-bold">Login</h2>
-            <input id="mobile" type="tel" placeholder="Enter Mobile Number" class="w-full p-4 text-black rounded-2xl mb-4 outline-none">
-            <button onclick="sendOTP()" class="w-full bg-orange-500 text-white shadow-lg">Send OTP</button>
-        </div>
+<div id="welcomeBanner" class="fixed inset-0 bg-black/70 flex items-center justify-center z-[9999] hidden">
+<div class="bg-white text-black p-6 rounded-3xl max-w-sm text-center shadow-2xl animate-bounce">
 
-        <div id="otpBox" class="card hidden">
-            <h2 class="text-xl mb-4 text-center font-bold">Enter OTP</h2>
-            <input id="otp" type="number" placeholder="Enter OTP" class="w-full p-4 text-black rounded-2xl mb-4 outline-none">
-            <button onclick="verifyOTP()" class="w-full bg-green-500 text-white shadow-lg">Verify OTP</button>
-        </div>
+<h2 class="text-2xl font-bold mb-2 text-orange-600">
+🔥 VIP Launch Offer
+</h2>
 
-        <div id="app" class="hidden">
-            <nav class="flex justify-between gap-2 mb-6 bg-black/30 p-2 rounded-[40px]">
-                <button class="bg-orange-500 text-white flex-1" onclick="showTab('claim')">Claim</button>
-                <button class="bg-yellow-500 text-black flex-1" onclick="showTab('wallet')">Wallet</button>
-                <button class="bg-purple-600 text-white flex-1" onclick="showTab('leaderboard')">Board</button>
-            </nav>
+<p class="text-sm mb-4">
+🎁 <b>First 30 Foodies Only!</b><br>
+Apne <b>1st Claim par seedha 30 Bonus Coins 🪙</b> pao!
+<br><br>
+⚡ Refer fast & grab rewards before it's gone!
+</p>
 
-            <div id="claim" class="card">
-                <div class="flex justify-between items-center mb-5 pb-2 border-b border-white/10">
-                    <h2 class="text-xl font-bold">Claim Reward</h2>
-                    <div class="bg-yellow-500/20 px-3 py-1 rounded-full border border-yellow-500/50 flex items-center gap-2">
-                        <span class="text-[10px] font-black uppercase tracking-wider text-yellow-500">Live</span>
-                        <span id="claimSectionCoins" class="text-yellow-400 font-bold text-base">0</span>
-                    </div>
-                </div>
-                <div class="space-y-4">
-                    <div>
-                        <label class="text-xs text-gray-400 ml-1 mb-1 block">Enter Secret Code</label>
-                        <input id="code" placeholder="Enter code here..." class="w-full p-4 text-black rounded-2xl bg-white/90 focus:bg-white transition-all outline-none border-2 border-transparent focus:border-orange-500">
-                    </div>
-                    <button onclick="claimCode()" class="w-full bg-orange-500 hover:bg-orange-600 p-4 rounded-2xl shadow-lg text-white font-bold flex justify-center items-center gap-2">
-                        <span>Claim Reward</span>
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
-                            <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd" />
-                        </svg>
-                    </button>
-                </div>
-            </div>
+<button onclick="closeWelcome()"
+class="bg-orange-500 text-white px-6 py-2 rounded-full">
+Awesome 🔥
+</button>
 
-            <div id="wallet" class="card hidden">
-                <h2 class="text-lg mb-3">Your Coins</h2>
-                <div class="text-4xl text-yellow-400 font-bold mb-2" id="coins">0</div>
-                <div class="progress-bar"><div id="milestoneProgress" class="progress"></div></div>
-                <div id="milestones" class="text-sm mb-4"></div>
-                <button onclick="toggleReferral()" class="bg-blue-600 text-white w-full mb-4">Refer Friend [Get 40 🪙]</button>
-                <div id="refBox" class="hidden mt-3 space-y-2">
-                    <input id="refMobile" placeholder="Friend Mobile" class="w-full p-3 text-black rounded-xl outline-none">
-                    <button onclick="referFriend()" class="bg-green-600 text-white w-full">Send & Share</button>
-                </div>
-                <div class="mt-4 bg-red-50 border-l-4 border-red-500 p-3 rounded-lg flex items-start space-x-3 shadow-sm">
-                    <i class="fa-solid fa-clock-rotate-left text-red-500 mt-1 animate-pulse"></i>
-                    <div class="text-left text-xs text-red-700">
-                        <p class="font-bold">⚠️ Use it or Lose it!</p>
-                        <p>Aapke kamaye hue coins <strong>60 Days</strong> ke baad expire hone lagenge. Jo coins jis din mile hain, theek 60 din baad automatically zero ho jayenge. Aaj hi Order karein !</p>
-                    </div>
-                </div>
-            </div>
+</div>
+</div>
 
-            <div id="leaderboard" class="card hidden">
-                <h2 class="text-xl font-bold mb-4">Top Foodies</h2>
-                <div id="board" class="space-y-2"></div>
-            </div>
-        </div>
-    </div>
+<div class="app">
 
-    <script>
-        const API = "https://script.google.com/macros/s/AKfycbykyEFd48wHvhndT1m4kiw_5dPtcEQzYuSH318XxZ-1w_T5y9gquvyGKhUjFdpJ08nD/exec";
-        let mobile = null, generatedOTP = null;
+<div class="text-center mb-6">
+<img src="EasyGo-Logo.png" class="h-16 mx-auto">
+<h1 class="text-3xl font-bold mt-2">EasyGo VIP Rewards</h1>
+</div>
 
-        function popup(msg) {
-            const p = document.getElementById("popup");
-            p.innerText = msg;
-            p.classList.add("show");
-            setTimeout(() => p.classList.remove("show"), 3000);
-        }
+<div id="login" class="card">
+<h2 class="text-xl mb-4 text-center font-bold">Login</h2>
+<input id="mobile" type="tel" placeholder="Enter Mobile Number"
+class="w-full p-4 text-black rounded-2xl mb-4 outline-none">
+<button onclick="sendOTP()" class="w-full bg-orange-500 text-white shadow-lg">Send OTP</button>
+</div>
 
-        async function api(data) {
-            try {
-                let res = await fetch(API, { method: "POST", body: JSON.stringify(data) });
-                return await res.json();
-            } catch (e) {
-                return { error: "Network Error" };
-            }
-        }
+<div id="otpBox" class="card hidden">
+<h2 class="text-xl mb-4 text-center font-bold">Enter OTP</h2>
+<input id="otp" type="number" placeholder="Enter OTP"
+class="w-full p-4 text-black rounded-2xl mb-4 outline-none">
+<button onclick="verifyOTP()" class="w-full bg-green-500 text-white shadow-lg">Verify OTP</button>
+</div>
 
-        function sendOTP() {
-            mobile = document.getElementById("mobile").value;
-            if (mobile.length != 10) { popup("Enter valid 10-digit mobile"); return; }
-            generatedOTP = Math.floor(1000 + Math.random() * 9000);
-            popup("OTP Sent: " + generatedOTP);
-            document.getElementById("login").classList.add("hidden");
-            document.getElementById("otpBox").classList.remove("hidden");
-        }
+<div id="app" class="hidden">
 
-        async function verifyOTP() {
-            if (document.getElementById("otp").value == generatedOTP) {
-                let res = await api({ action: "login", mobile });
-                if (res.success) {
-                    localStorage.setItem("easygo_user", mobile);
-                    startApp();
-                } else popup("Login failed");
-            } else popup("Invalid OTP");
-        }
+<nav class="flex justify-between gap-2 mb-6 bg-black/30 p-2 rounded-[40px]">
+<button class="bg-orange-500 text-white flex-1" onclick="showTab('claim')">Claim</button>
+<button class="bg-yellow-500 text-black flex-1" onclick="showTab('wallet')">Wallet</button>
+<button class="bg-purple-600 text-white flex-1" onclick="showTab('leaderboard')">Board</button>
+</nav>
 
-        window.onload = () => {
-            let saved = localStorage.getItem("easygo_user");
-            if (saved) { mobile = saved; startApp(); }
-        };
+<div id="claim" class="card">
 
-        function startApp() {
-            document.getElementById("login").style.display = "none";
-            document.getElementById("otpBox").style.display = "none";
-            document.getElementById("app").classList.remove("hidden");
-            loadWallet();
-            loadLeaderboard();
-        }
+<div class="flex justify-between items-center mb-5 pb-2 border-b border-white/10">
+<h2 class="text-xl font-bold">Claim Reward</h2>
+<div class="bg-yellow-500/20 px-3 py-1 rounded-full border border-yellow-500/50 flex items-center gap-2">
+<span class="text-[10px] font-black uppercase tracking-wider text-yellow-500">Live</span>
+<span id="claimSectionCoins" class="text-yellow-400 font-bold text-base">0</span>
+</div>
+</div>
 
-        function showTab(id) {
-            ["claim", "wallet", "leaderboard"].forEach(t => document.getElementById(t).classList.add("hidden"));
-            document.getElementById(id).classList.remove("hidden");
-        }
+<div class="space-y-4">
 
-        const milestonesArr = [
-    { coins: 90, text: "[2 Pcs] Crispy Mini Samosas" },
-    { coins: 100, text: "[2 Pcs] Crunchy Cheese Balls" },
-    { coins: 150, text: "[70 G] French Fries 🍟" },
-    { coins: 200, text: "[2 Pcs] Cheese Corn Nuggets" },
-    { coins: 250, text: "[5 Pcs] Veg Momos 🥟" },
-    { coins: 300, text: "[4 Pcs] Spring Roll" },
-    { coins: 350, text: "[5 Pcs] Premium Paneer Momos" },
-    { coins: 400, text: "Full Plate Veg Momos" },
-    { coins: 450, text: "Full Plate Cheese Corn Nuggets" },
-    { coins: 500, text: "VIP 👑: [7 Pcs] Cheese Corn Momos + Fries🍟" }
-        ];
+<div>
+<label class="text-xs text-gray-400 ml-1 mb-1 block">Enter Secret Code</label>
+<input id="code" placeholder="Enter code here..."
+class="w-full p-4 text-black rounded-2xl bg-white/90 outline-none">
+</div>
 
-        async function loadWallet() {
-            let res = await api({ action: "wallet", mobile });
-            if (res.coins !== undefined) {
-                animateCoins(res.coins);
-                updateMilestones(res.coins);
-            }
-        }
+<button onclick="claimCode()"
+class="w-full bg-orange-500 p-4 rounded-2xl shadow-lg text-white font-bold">
+Claim Reward
+</button>
 
-        function animateCoins(target) {
-            const walletEl = document.getElementById("coins");
-            const claimEl = document.getElementById("claimSectionCoins");
-            let current = parseInt(walletEl.innerText) || 0;
-            const duration = 1000;
-            const frameRate = 30;
-            const totalFrames = (duration / 1000) * frameRate;
-            const increment = (target - current) / totalFrames;
-            let frame = 0;
-            const interval = setInterval(() => {
-                frame++;
-                current += increment;
-                const displayValue = Math.round(current);
-                if (walletEl) walletEl.innerText = displayValue;
-                if (claimEl) claimEl.innerText = displayValue;
-                if (frame >= totalFrames) {
-                    walletEl.innerText = target;
-                    claimEl.innerText = target;
-                    clearInterval(interval);
-                }
-            }, 1000 / frameRate);
-        }
+</div>
+</div>
 
-        function updateMilestones(coins) {
-            const bar = document.getElementById("milestoneProgress");
-            let nextM = milestonesArr.find(m => m.coins > coins) || milestonesArr[milestonesArr.length - 1];
-            let prevM = [...milestonesArr].reverse().find(m => m.coins <= coins) || { coins: 0 };
-            let percent = ((coins - prevM.coins) / (nextM.coins - prevM.coins)) * 100;
-            bar.style.width = Math.min(100, Math.max(0, percent)) + "%";
-            const mDiv = document.getElementById("milestones");
-            mDiv.innerHTML = "";
-            milestonesArr.forEach(m => {
-                mDiv.innerHTML += `<div class="milestone-badge ${coins >= m.coins ? 'reached' : ''}">${m.coins} → ${m.text}</div>`;
-            });
-        }
+<div id="wallet" class="card hidden">
 
-        async function claimCode() {
-            let input = document.getElementById("code");
-            let res = await api({ action: "claim", mobile, code: input.value.trim() });
-            if (res.error) { popup(res.error); return; }
-            confetti({ particleCount: 100, spread: 70, origin: { y: 0.6 } });
-            popup("Success! Reward Claimed.");
-            input.value = "";
-            loadWallet();
-            loadLeaderboard();
-        }
+<h2 class="text-lg mb-3">Your Coins</h2>
+<div class="text-4xl text-yellow-400 font-bold mb-2" id="coins">0</div>
 
-        function toggleReferral() { document.getElementById("refBox").classList.toggle("hidden"); }
+<div class="progress-bar">
+<div id="milestoneProgress" class="progress"></div>
+</div>
 
-        async function referFriend() {
-            let friend = document.getElementById("refMobile").value;
-            if (friend.length != 10) { popup("Invalid number"); return; }
-            let res = await api({ action: "refer", mobile, friend });
-            if (res.success) {
-                let msg = encodeURIComponent(`
-                🛑 *RUK JAO FOODIE! Ye message Miss kiya toh Bahut Pachtaoge!* 🛑
--------------------------------------------------------------
-                Indore ke sabse juicy Cheese Corn Momos or Garma-Garam Mini Samosas bilkul 
-                FREE!! FREE!! FREE!! bat rahe hain! 😍🥟
-                Maine EasyGo ka *VIP Club* join kiya hai. Akele akele khane mein mazaa nahi, tu bhi aaja! 
-                Mere Link se Join karega toh direct VIP Entry or Bonus Coins Milenge! 🪙✨
--------------------------------------------------------------
-                    👑 Apni Foodie Loot Yahan Claim Kar:
-                    👉 https://clean-scripts.github.io/Easygo-Points/
-                    _(Baad mein mat bolna maine akele kha liya!)_ 🏃‍♂️💨
-                `);
-                window.location.href = `https://api.whatsapp.com/send?text=${msg}`;
-            } else { popup(res.error); }
-        }
+<div id="milestones" class="text-sm mb-4"></div>
 
-        async function loadLeaderboard() {
-            let res = await api({ action: "leaderboard" });
-            if (!Array.isArray(res)) return;
-            let board = document.getElementById("board");
-            board.innerHTML = "";
-            res.forEach((u, i) => {
-                let medal = i == 0 ? "🥇" : i == 1 ? "🥈" : i == 2 ? "🥉" : "#" + (i + 1);
-                board.innerHTML += `<div class="flex justify-between border-b border-white/10 py-2"><span>${medal} XX${String(u.mobile).slice(-4)}</span><span>${u.coins} coins</span></div>`;
-            });
-        }
-    </script>
+<button onclick="toggleReferral()" class="bg-blue-600 text-white w-full mb-4">
+Refer Friend [Get 40 🪙]
+</button>
+
+<div id="refBox" class="hidden mt-3 space-y-2">
+<input id="refMobile" placeholder="Friend Mobile"
+class="w-full p-3 text-black rounded-xl outline-none">
+
+<button onclick="referFriend()" class="bg-green-600 text-white w-full">
+Send & Share
+</button>
+</div>
+
+</div>
+
+<div id="leaderboard" class="card hidden">
+<h2 class="text-xl font-bold mb-4">Top Foodies</h2>
+<div id="board" class="space-y-2"></div>
+</div>
+
+</div>
+</div>
+
+<script>
+
+const API="https://script.google.com/macros/s/AKfycbykyEFd48wHvhndT1m4kiw_5dPtcEQzYuSH318XxZ-1w_T5y9gquvyGKhUjFdpJ08nD/exec"
+
+let mobile=null
+let generatedOTP=null
+
+function popup(msg){
+const p=document.getElementById("popup")
+p.innerText=msg
+p.classList.add("show")
+setTimeout(()=>p.classList.remove("show"),3000)
+}
+
+async function api(data){
+let res=await fetch(API,{method:"POST",body:JSON.stringify(data)})
+return await res.json()
+}
+
+function sendOTP(){
+
+mobile=document.getElementById("mobile").value
+
+if(mobile.length!=10){
+popup("Enter valid 10-digit mobile")
+return
+}
+
+generatedOTP=Math.floor(1000+Math.random()*9000)
+
+popup("OTP Sent: "+generatedOTP)
+
+document.getElementById("login").classList.add("hidden")
+document.getElementById("otpBox").classList.remove("hidden")
+
+}
+
+async function verifyOTP(){
+
+if(document.getElementById("otp").value==generatedOTP){
+
+let res=await api({action:"login",mobile})
+
+if(res.success){
+
+localStorage.setItem("easygo_user",mobile)
+
+startApp()
+
+if(res.showOffer){
+document.getElementById("welcomeBanner").classList.remove("hidden")
+}
+
+}
+else popup("Login failed")
+
+}
+else popup("Invalid OTP")
+
+}
+
+function closeWelcome(){
+document.getElementById("welcomeBanner").classList.add("hidden")
+}
+
+window.onload=()=>{
+
+let saved=localStorage.getItem("easygo_user")
+
+if(saved){
+mobile=saved
+startApp()
+}
+
+}
+
+function startApp(){
+
+document.getElementById("login").style.display="none"
+document.getElementById("otpBox").style.display="none"
+
+document.getElementById("app").classList.remove("hidden")
+
+loadWallet()
+loadLeaderboard()
+
+}
+
+function showTab(id){
+
+["claim","wallet","leaderboard"].forEach(t=>document.getElementById(t).classList.add("hidden"))
+
+document.getElementById(id).classList.remove("hidden")
+
+}
+
+const milestonesArr=[
+{coins:90,text:"[2 Pcs] Crispy Mini Samosas"},
+{coins:100,text:"[2 Pcs] Crunchy Cheese Balls"},
+{coins:150,text:"[70 G] French Fries 🍟"},
+{coins:200,text:"[2 Pcs] Cheese Corn Nuggets"},
+{coins:250,text:"[5 Pcs] Veg Momos 🥟"},
+{coins:300,text:"[4 Pcs] Spring Roll"},
+{coins:350,text:"[5 Pcs] Premium Paneer Momos"},
+{coins:400,text:"Full Plate Veg Momos"},
+{coins:450,text:"Full Plate Cheese Corn Nuggets"},
+{coins:500,text:"VIP 👑: [7 Pcs] Cheese Corn Momos + Fries🍟"}
+]
+
+async function loadWallet(){
+
+let res=await api({action:"wallet",mobile})
+
+if(res.coins!==undefined){
+
+animateCoins(res.coins)
+updateMilestones(res.coins)
+
+}
+
+}
+
+function animateCoins(target){
+
+const walletEl=document.getElementById("coins")
+const claimEl=document.getElementById("claimSectionCoins")
+
+walletEl.innerText=target
+claimEl.innerText=target
+
+}
+
+function updateMilestones(coins){
+
+const bar=document.getElementById("milestoneProgress")
+
+let nextM=milestonesArr.find(m=>m.coins>coins)||milestonesArr[milestonesArr.length-1]
+
+let prevM=[...milestonesArr].reverse().find(m=>m.coins<=coins)||{coins:0}
+
+let percent=((coins-prevM.coins)/(nextM.coins-prevM.coins))*100
+
+bar.style.width=Math.min(100,Math.max(0,percent))+"%"
+
+const mDiv=document.getElementById("milestones")
+
+mDiv.innerHTML=""
+
+milestonesArr.forEach(m=>{
+mDiv.innerHTML+=`<div class="milestone-badge ${coins>=m.coins?'reached':''}">${m.coins} → ${m.text}</div>`
+})
+
+}
+
+async function claimCode(){
+
+let input=document.getElementById("code")
+
+let res=await api({action:"claim",mobile,code:input.value.trim()})
+
+if(res.error){
+popup(res.error)
+return
+}
+
+confetti({particleCount:100,spread:70,origin:{y:.6}})
+
+popup("Success! Reward Claimed.")
+
+input.value=""
+
+loadWallet()
+loadLeaderboard()
+
+}
+
+function toggleReferral(){
+document.getElementById("refBox").classList.toggle("hidden")
+}
+
+async function referFriend(){
+
+let friend=document.getElementById("refMobile").value
+
+if(friend.length!=10){
+popup("Invalid number")
+return
+}
+
+let res=await api({action:"refer",mobile,friend})
+
+if(res.success){
+
+let msg=encodeURIComponent(`
+🔥 EasyGo VIP Club
+
+FREE Momos & Snacks Loot 😍
+
+Join now:
+https://clean-scripts.github.io/Easygo-Points/
+`)
+
+window.location.href=`https://api.whatsapp.com/send?text=${msg}`
+
+}
+else popup(res.error)
+
+}
+
+async function loadLeaderboard(){
+
+let res=await api({action:"leaderboard"})
+
+if(!Array.isArray(res))return
+
+let board=document.getElementById("board")
+
+board.innerHTML=""
+
+res.forEach((u,i)=>{
+
+let medal=i==0?"🥇":i==1?"🥈":i==2?"🥉":"#"+(i+1)
+
+board.innerHTML+=`
+<div class="flex justify-between border-b border-white/10 py-2">
+<span>${medal} XX${String(u.mobile).slice(-4)}</span>
+<span>${u.coins} coins</span>
+</div>
+`
+
+})
+
+}
+
+</script>
 </body>
 </html>

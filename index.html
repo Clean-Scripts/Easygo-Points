@@ -162,22 +162,31 @@ async function sendOTP() {
 }
 
 async function verifyOTP() {
-    if(document.getElementById("otp").value == generatedOTP) {
+    let val = document.getElementById("otp").value;
+    if(val == generatedOTP) {
+        // Backend login call
         let res = await api({ action: "login", mobile });
         
         if(res.success) {
             localStorage.setItem("easygo_user", mobile);
             
-            // AGAR SHEET MEIN OFFER HAI TO BANNER UPDATE KARO
+            // Step 1: Check for Offer Banner
             if(res.offer) {
                 const banner = document.getElementById("welcomeBanner");
-                banner.querySelector("h2").innerText = res.offer.title; // Sheet ka Title
-                banner.querySelector("p").innerHTML = res.offer.message; // Sheet ka Message
+                banner.querySelector("h2").innerText = res.offer.title; 
+                banner.querySelector("p").innerHTML = res.offer.message; 
                 banner.classList.remove("hidden");
+                // Note: Is case mein user 'Let's Go' button dabayega tabhi aage dikhega
             }
 
+            // Step 2: ALWAYS call startApp to show the main UI
             startApp();
+            
+            // Celebration!
             confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
+        } else {
+            popup("Login Failed. Try Again.");
+            location.reload(); // Reload if backend fails
         }
     } else {
         popup("Wrong OTP!");

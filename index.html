@@ -121,13 +121,23 @@
         return await res.json();
     }
 
-    function sendOTP() {
-        mobile = document.getElementById("mobile").value;
-        if(mobile.length !== 10) return popup("Invalid Mobile Number!");
+async function sendOTP() {
+    mobile = document.getElementById("mobile").value;
+    if(mobile.length !== 10) return popup("Enter 10 digit mobile!");
 
-        generatedOTP = Math.floor(1000 + Math.random() * 9000);
+    // Button loading state (Optional but good for UI)
+    const btn = document.querySelector("#login button");
+    btn.innerText = "Sending...";
+    btn.disabled = true;
+
+    // Backend se OTP mangwana
+    let res = await api({ action: "sendOTP", mobile });
+    
+    if(res.success) {
+        generatedOTP = res.otp; // Backend ne jo OTP bheja wo yahan save hoga
         popup("OTP Sent: " + generatedOTP);
 
+        // UI Change: Login chhupao, OTP dikhao
         document.getElementById("login").classList.add("hidden");
         document.getElementById("otpBox").classList.remove("hidden");
 
@@ -136,25 +146,31 @@
             document.getElementById("otpLoader").style.width = "100%";
             setTimeout(() => {
                 document.getElementById("otp").value = generatedOTP;
-                verifyOTP(); // Auto-login call
+                verifyOTP(); // Auto-verify call
             }, 1500);
         }, 500);
+    } else {
+        popup("Error sending OTP");
+        btn.innerText = "Get OTP";
+        btn.disabled = false;
     }
+}
 
-    async function verifyOTP() {
-        let val = document.getElementById("otp").value;
-        if(val == generatedOTP) {
-            let res = await api({ action: "login", mobile });
-            if(res.success) {
-                localStorage.setItem("easygo_user", mobile);
-                startApp();
-                document.getElementById("welcomeBanner").classList.remove("hidden");
-                confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 }, colors: ['#facc15', '#f97316', '#ffffff'] });
-            }
-        } else {
-            popup("Wrong OTP!");
+async function verifyOTP() {
+    let val = document.getElementById("otp").value;
+    if(val == generatedOTP) {
+        // Backend login call taaki sheets check hon (New user/Old user)
+        let res = await api({ action: "login", mobile });
+        if(res.success) {
+            localStorage.setItem("easygo_user", mobile);
+            startApp();
+            document.getElementById("welcomeBanner").classList.remove("hidden");
+            confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
         }
+    } else {
+        popup("Wrong OTP! Try again.");
     }
+}
 
     function startApp() {
         document.getElementById("otpBox").classList.add("hidden");
